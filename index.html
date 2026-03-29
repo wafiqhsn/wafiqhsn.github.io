@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -75,6 +75,25 @@
     .theme-toggle.just-clicked .icon-moon       { transform: translateY(200%) !important; }
     .dark .theme-toggle.just-clicked .icon-moon { transform: translateY(0) !important; }
     .dark .theme-toggle.just-clicked .icon-sun  { transform: translateY(200%) !important; }
+
+    /* GLASS POCKET — top is set dynamically by JS */
+    #blurGlass {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-top: 2px solid rgba(255,255,255,0.7);
+      z-index: 200;
+      pointer-events: none;
+      transition: top 0.3s ease, opacity 0.5s ease, background 0.5s ease, border-top-color 0.5s ease;
+    }
+    .dark #blurGlass {
+      background: rgba(0,0,0,0.4);
+      border-top-color: rgba(255,255,255,0.1);
+    }
   </style>
 </head>
 
@@ -82,7 +101,7 @@
 
   <header class="fixed top-0 left-0 w-full z-[999] bg-white/70 dark:bg-black/60 text-gray-900 dark:text-gray-100 backdrop-blur-xl transition-colors duration-500">
     <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-sm font-medium">Piko's Visual Archive</div>
+      <div class="text-sm font-medium truncate">Piko's Visual Archive</div>
       <div class="flex items-center gap-6 text-sm">
 
         <button class="theme-toggle" onclick="toggleTheme(this)">
@@ -109,225 +128,249 @@
     </div>
   </header>
 
-<div class="main-content min-h-screen flex flex-col pt-32 relative">
-  <div class="text-center max-w-4xl px-10 flex flex-col items-center relative z-10 mx-auto flex-none">
-    <h1 class="text-xl sm:text-3xl mb-1 text-black dark:text-white transition-colors duration-500">Hi! I am Piko 👋🏻</h1>
-    <p class="text-[15px] sm:text-xl text-gray-800 dark:text-gray-200 leading-relaxed mb-3 transition-colors duration-500">
-      A creative designer ✏️ based in Jakarta&nbsp;🌲. Passionate about crafting
-      <br class="hidden sm:block">
-      graphic design, motion graphics, and UI/UX&nbsp;💻. Interested in ideas 
-      <br class="hidden sm:block">
-      surrounding arts, architecture, fashion, music and culture&nbsp;🧑🏻‍🎨.
-    </p>
-<div class="flex justify-center gap-1">
-  <a href="mailto:wafiqhasan10@gmail.com" class="group inline-flex items-center w-fit px-4 pt-0.5 pb-0.5 text-[14px] sm:text-[18px] font-medium rounded-full bg-black text-white dark:bg-zinc-800 dark:text-white border border-transparent dark:border-zinc-700 hover:bg-yellow-400 hover:text-black dark:hover:bg-yellow-400 dark:hover:text-black active:scale-95 transition-all duration-200">
-    <span class="flex items-center gap-1 whitespace-nowrap">
-      Let's Collaborate!
-      <span class="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-1 transition-all duration-300">📩</span>
-    </span>
-  </a>
-</div>
-  </div>
+  <!-- Glass pocket & copyright: fixed, outside main-content so they're unaffected by blur -->
+  <div id="blurGlass"></div>
+  <div id="copyright" class="fixed bottom-3 left-0 w-full text-center text-xs text-gray-500 dark:text-gray-400 z-[300] pointer-events-none transition-all duration-500">©2026 Wafiq Hasan</div>
 
-  <div class="flex-grow w-full flex items-center justify-center relative py-10">
-    <div class="absolute bottom-0 left-0 w-full top-[60%] bg-white/50 dark:bg-black/40 backdrop-blur-[30px] border-t-2 border-white/70 dark:border-white/10 z-[200] pointer-events-none transition-colors duration-500"></div>
-    <div class="absolute bottom-3 left-0 w-full text-center text-xs text-gray-500 dark:text-gray-400 z-[300] pointer-events-none">©2026 Wafiq Hasan</div>
-    
-    <!-- overlap dikontrol sm:-ml-[Xpx] di card 2-7, makin besar X = makin numpuk -->
-    <div class="relative w-full max-w-sm sm:max-w-none sm:w-full mx-auto sm:px-20 h-[280px] sm:h-auto block sm:flex sm:justify-center sm:items-center z-20 sm:z-20 mt-10 sm:mt-20">
-      <a href="https://www.behance.net/gallery/237299153/Vidio-Social-Media-Content" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#de3846] bg-[url('images/Project-1.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[30] sm:z-[70] top-[-30px] sm:top-auto left-[4%] sm:left-auto sm:translate-y-3 rotate-[-6deg] sm:rotate-[-4deg]"></a>
-      <a href="https://www.behance.net/gallery/237297073/Jagocpns" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#f5cd46] bg-[url('images/Project-2.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[20] sm:z-[60] top-[-50px] sm:top-auto left-[34%] sm:left-auto sm:-translate-y-5 sm:-ml-[50px] rotate-[2deg] sm:rotate-[2deg]"></a>
-      <a href="https://www.behance.net/237288371/Kirimaja-Branding/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#87cfc8] bg-[url('images/Project-3.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[10] sm:z-[50] top-[-30px] sm:top-auto right-[4%] sm:right-auto sm:-translate-y-1 sm:-ml-[50px] rotate-[10deg] sm:rotate-[-2deg]"></a>
-      <a href="https://www.behance.net/177106157/BEM-Unpad-2023-Kunci-Jawaban/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#001ab4] bg-[url('images/Project-4.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[70] sm:z-[40] top-20 sm:top-auto left-[0%] sm:left-auto sm:-translate-y-12 sm:-ml-[50px] rotate-[-4deg] sm:rotate-[0deg]"></a>
-      <a href="https://www.behance.net/177036489/Prabu-Unpad-2022/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#939393] bg-[url('images/Project-5.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[60] sm:z-[30] top-16 sm:top-auto left-[24%] sm:left-auto sm:-translate-y-2 sm:-ml-[50px] rotate-[-1deg] sm:rotate-[1deg]"></a>
-      <a href="https://www.behance.net/163697683/Smansaku-Campus-Expo-2022/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#2b2140] bg-[url('images/Project-6.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[50] sm:z-[20] top-14 sm:top-auto right-[24%] sm:right-auto sm:-translate-y-5 sm:-ml-[50px] rotate-[3deg] sm:rotate-[3deg]"></a>
-      <a href="https://www.behance.net/182622713/Gikslab-Indonesia/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#213f54] bg-[url('images/Project-7.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[40] sm:z-[10] top-20 sm:top-auto right-[0%] sm:right-auto sm:translate-y-2 sm:-ml-[50px] rotate-[5deg] sm:rotate-[4deg]"></a>
-
-    </div>
-  </div>
-</div>
-
-<div class="cv-modal fixed inset-0 z-[998] overflow-y-auto">
-  <div onclick="closeCV()" class="fixed inset-0"></div>
-  <div class="relative max-w-3xl mx-auto px-6 md:px-20 py-24">
-    <button onclick="closeCV()" class="fixed top-6 right-6 text-sm opacity-60 hover:opacity-100 dark:text-white font-medium">close</button>
-    
-    <div class="space-y-6">
-
-  <div class="max-w-4xl p-3 bg-[#E5EDF3] border border-transparent dark:bg-zinc-800 dark:border-zinc-700 rounded-xl relative flex flex-col gap-3">
-    
-    <!-- TOP -->
-    <div class="flex flex-row items-stretch gap-3">
-      
-      <!-- IMAGE / RECT -->
-      <div class="w-24 md:w-24 aspect-[3/3.5] bg-[#BDC5CB] dark:bg-zinc-700 bg-[url('images/profile.png')] bg-cover bg-center rounded-md shrink-0"></div>
-      
-      <!-- TEXT -->
-      <div class="flex-1 flex flex-col justify-between min-w-0">
-        
-        <!-- NAME -->
-        <div class="space-y-1">
-          <h1 class="text-3xl tracking-tight text-black dark:text-white leading-none">Piko</h1>
-          <span class="inline-block px-2 py-0.3 bg-white rounded-full text-xs text-black dark:text-white border border-transparent dark:bg-zinc-700">
-            Multidisciplinary Designer
+<div class="main-content min-h-screen flex flex-col pt-28 relative">
+    <!-- Intro text -->
+    <div class="text-center max-w-4xl px-10 flex flex-col items-center relative z-10 mx-auto flex-none mb-6 sm:mb-10">
+      <h1 class="text-xl sm:text-3xl mb-1 text-black dark:text-white transition-colors duration-500">Hi! I am Piko 👋🏻</h1>
+      <p class="text-[15px] sm:text-xl text-gray-800 dark:text-gray-200 leading-relaxed mb-3 transition-colors duration-500">
+        A multidisciplinary designer ✏️ based in Jakarta 🌲. I specialize in graphic design, motion graphics, and UI/UX, with a focus on clear visual communication 🖥. I believe in form follows function and a little bit of fun 🧑🏻‍🎨.
+      </p>
+      <div class="flex justify-center gap-1">
+        <a href="mailto:wafiqhasan10@gmail.com" class="group inline-flex items-center w-fit px-4 pt-0.5 pb-0.5 text-[14px] sm:text-[18px] font-medium rounded-full bg-black text-white dark:bg-zinc-800 dark:text-white border border-transparent dark:border-zinc-700 hover:bg-yellow-400 hover:text-black dark:hover:bg-yellow-400 dark:hover:text-black active:scale-95 transition-all duration-200">
+          <span class="flex items-center gap-1 whitespace-nowrap">
+            Let's Collaborate!
+            <span class="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-1 transition-all duration-300">📩</span>
           </span>
-        </div>
-        
-        <!-- CONTACT -->
-        <div class="space-y-0.5 text-xs text-black dark:text-white">
-          <div class="flex items-center gap-2">
-            <span class="opacity-70">✉️</span>
-            <a href="mailto:wafiqhasan10@gmail.com" class="hover:underline truncate">
-              wafiqhasan10@gmail.com
-            </a>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="opacity-70">📞</span>
-            <a href="https://wa.me/6285290402449" class="hover:underline">
-              +62 852 9040 2449
-            </a>
-          </div>
-          <div class="flex items-center gap-2 font-medium">
-            <span class="opacity-70">📍</span>
-            <span>Jakarta, ID</span>
-          </div>
-        </div>
-
+        </a>
       </div>
     </div>
 
-    <!-- BUTTON -->
-      <div class="sm:absolute sm:bottom-3 sm:right-3 flex justify-between items-center bg-[#FFD400] rounded-lg text-black overflow-hidden">
-      <a href="https://drive.google.com/file/d/1ptUa8NC2_C57vPdolugWmaEgKEF1b3-g/view?usp=drive_link" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="px-3 py-2 inline-flex flex-col items-start text-left">
-          <span class="text-xs leading-none">Download</span>
-          <span class="text-xs flex items-center gap-1 justify-start font-medium">
-            My Resume <span>↗</span>
-          </span>
-      </a>
-
-      <div class="h-8 border-l border-black/10"></div>
-      <a href="https://drive.google.com/file/d/1llZMCI6Dl_-RVUQu9ySJ4RSdKSjKFMhu/view?usp=drive_link" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="px-3 py-2 inline-flex flex-col items-start text-left">
-          <span class="text-xs leading-none">Download</span>
-          <span class="text-xs flex items-center gap-1 justify-start font-medium">
-            My Portfolio <span>↗</span>
-          </span>
-      </a>
-
+    <!-- Cards -->
+    <div class="w-full flex items-start justify-center relative pb-10">
+<div id="cardStack" class="relative w-full max-w-sm sm:max-w-none sm:w-full mx-auto sm:px-20 h-[280px] sm:h-auto block sm:flex sm:justify-center sm:items-center z-20 sm:z-20 mt-20 sm:mt-36">        
+        <a href="https://www.behance.net/gallery/237299153/Vidio-Social-Media-Content" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#de3846] bg-[url('images/Project-1.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[30] sm:z-[70] top-[-30px] sm:top-auto left-[4%] sm:left-auto sm:translate-y-3 rotate-[-6deg] sm:rotate-[-9deg]"></a>
+        <a href="https://www.behance.net/gallery/237297073/Jagocpns" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#f5cd46] bg-[url('images/Project-2.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[20] sm:z-[60] top-[-50px] sm:top-auto left-[34%] sm:left-auto sm:-translate-y-5 sm:-ml-[50px] rotate-[2deg] sm:rotate-[-6deg]"></a>
+        <a href="https://www.behance.net/237288371/Kirimaja-Branding/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#87cfc8] bg-[url('images/Project-3.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[10] sm:z-[50] top-[-30px] sm:top-auto right-[4%] sm:right-auto sm:-translate-y-1 sm:-ml-[50px] rotate-[10deg] sm:rotate-[-3deg]"></a>
+        <a href="https://www.behance.net/177106157/BEM-Unpad-2023-Kunci-Jawaban/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#2b2140] bg-[url('images/Project-4.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[70] sm:z-[40] top-20 sm:top-auto left-[0%] sm:left-auto sm:-translate-y-12 sm:-ml-[50px] rotate-[-4deg] sm:rotate-[0deg]"></a>
+        <a href="https://www.behance.net/177036489/Prabu-Unpad-2022/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#F36754] bg-[url('images/Project-5.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[60] sm:z-[30] top-16 sm:top-auto left-[24%] sm:left-auto sm:-translate-y-2 sm:-ml-[50px] rotate-[-1deg] sm:rotate-[3deg]"></a>
+        <a href="https://www.behance.net/163697683/Smansaku-Campus-Expo-2022/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#174157] bg-[url('images/Project-6.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[50] sm:z-[20] top-14 sm:top-auto right-[24%] sm:right-auto sm:-translate-y-5 sm:-ml-[50px] rotate-[3deg] sm:rotate-[6deg]"></a>
+        <a href="https://www.behance.net/182622713/Gikslab-Indonesia/" target="_blank" class="block aspect-[4/5] w-28 sm:w-56 bg-[#001ab4] bg-[url('images/Project-7.png')] bg-cover bg-center transition-all duration-500 ease-[cubic-bezier(.34,1.56,.64,1)] hover:-translate-y-12 sm:hover:-translate-y-16 hover:scale-110 hover:shadow-2xl absolute sm:relative z-[40] sm:z-[10] top-20 sm:top-auto right-[0%] sm:right-auto sm:translate-y-2 sm:-ml-[50px] rotate-[5deg] sm:rotate-[9deg]"></a>
+      </div>
     </div>
-
   </div>
 
-      <section>
-        <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Education</h2>
-        <div class="space-y-10">
-          <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm tabular-nums">2021 — 2025</span>
-            <div>
-              <h3 class="font-semibold text-base dark:text-white">
-                Bachelor Degree of Film and Television
-                <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Padjadjaran University
-              </h3>
-              <p class="text-gray-500 text-sm">Bandung, ID</p>
-              <p class="text-gray-500 dark:text-gray-300 text-sm mt-1 font-medium">GPA 3.71 / 4.00</p>
-            </div>
-          </div>
-        </div>
-      </section>
+  <div class="cv-modal fixed inset-0 z-[998] overflow-y-auto">
+    <div onclick="closeCV()" class="fixed inset-0"></div>
+    <div class="relative max-w-3xl mx-auto px-6 md:px-20 py-24">
+      <button onclick="closeCV()" class="fixed top-6 right-6 text-sm opacity-60 hover:opacity-100 dark:text-white font-medium">close</button>
+      
+      <div class="space-y-6">
 
-      <section>
-        <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Experience</h2>
-        <div class="space-y-8">
-          <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm tabular-nums">Oct 2025 — Present</span>
-            <div>
-              <h3 class="font-semibold text-base dark:text-white">Graphic Designer 
-                <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Loan Market
-              </h3>
-              <p class="text-gray-500 text-sm">Jakarta, ID</p>
-              <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              Created visual assets for marketing campaigns and communications. Developed social media content, flyers, invitations, and graphics for web and print. Worked with teams to ensure consistent visual communication.              </p>
-            </div>
+    <div class="max-w-4xl p-3 bg-[#E5EDF3] border border-transparent dark:bg-zinc-800 dark:border-zinc-700 rounded-xl relative flex flex-col gap-3">
+      
+      <!-- TOP -->
+      <div class="flex flex-row items-stretch gap-3">
+        
+        <!-- IMAGE / RECT -->
+        <div class="w-24 md:w-24 aspect-[3/3.5] bg-[#BDC5CB] dark:bg-zinc-700 bg-[url('images/profile.png')] bg-cover bg-center rounded-md shrink-0"></div>
+        
+        <!-- TEXT -->
+        <div class="flex-1 flex flex-col justify-between min-w-0">
+          
+          <!-- NAME -->
+          <div class="space-y-1 w-full overflow-hidden">
+            <h1 class="text-3xl tracking-tight text-black dark:text-white leading-none truncate max-w-full">Piko</h1>
+            <span class="inline-block px-2 py-0.3 bg-white rounded-full text-xs text-black dark:text-white border border-transparent dark:bg-zinc-700 truncate max-w-full">
+              Multidisciplinary Designer
+            </span>
           </div>
           
-          <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm tabular-nums">Aug 2025 — Sep 2025</span>
-            <div>
-              <h3 class="font-semibold text-base dark:text-white">Creative Designer 
-                <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Observisual
-              </h3>
-              <p class="text-gray-500 text-sm">Bandung, ID</p>
-              <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement. I also collaborated closely with Strategic and Project Managers to deliver high-quality creative outputs on time across multiple campaigns.              </p>
+          <!-- CONTACT -->
+          <div class="space-y-0.5 text-xs text-black dark:text-white">
+            <div class="flex items-center gap-2">
+              <span class="opacity-70">✉️</span>
+              <a href="mailto:wafiqhasan10@gmail.com" class="hover:underline truncate">
+                wafiqhasan10@gmail.com
+              </a>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="opacity-70">📞</span>
+              <a href="https://wa.me/6285290402449" class="hover:underline truncate">
+                +62 852 9040 2449
+              </a>
+            </div>
+            <div class="flex items-center gap-2 font-medium">
+              <span class="opacity-70">📍</span>
+              <span class="truncate">Jakarta, ID</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm tabular-nums">Aug 2023 — Feb 2024</span>
-            <div>
-              <h3 class="font-semibold text-base dark:text-white">Motion Graphic Designer 
-                <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Vidio
-              </h3>
-              <p class="text-gray-500 text-sm">Jakarta, ID</p>
-              <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              As a Motion Graphic Designer, I produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.              </p>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm tabular-nums">Mar 2023 — Jun 2023</span>
-            <div>
-              <h3 class="font-semibold text-base dark:text-white">Creative Designer 
-                <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Gikslab
-              </h3>
-              <p class="text-gray-500 text-sm">Bandung, ID</p>
-              <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              As a Creative Designer, I created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.              </p>
-            </div>
-          </div>
         </div>
-      </section>
+      </div>
 
-      <section>
-        <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Skill & Tools</h2>
-        <div class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm">Skill</span>
-            <div class="flex flex-wrap gap-2">
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Graphic Design</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Motion Graphic</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">UI/UX Design</span>
-            </div>
-          </div>
+      <!-- BUTTON -->
+        <div class="sm:absolute sm:bottom-3 sm:right-3 flex justify-between items-center bg-[#FFD400] rounded-lg text-black overflow-hidden">
+        <a href="https://drive.google.com/file/d/1ptUa8NC2_C57vPdolugWmaEgKEF1b3-g/view?usp=drive_link" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="px-3 py-2 inline-flex flex-col items-start text-left">
+            <span class="text-xs leading-none">Download</span>
+            <span class="text-xs flex items-center gap-1 justify-start font-medium">
+              My Resume <span>↗</span>
+            </span>
+        </a>
+
+        <div class="h-8 border-l border-black/10"></div>
+        <a href="https://drive.google.com/file/d/1llZMCI6Dl_-RVUQu9ySJ4RSdKSjKFMhu/view?usp=drive_link" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="px-3 py-2 inline-flex flex-col items-start text-left">
+            <span class="text-xs leading-none">Download</span>
+            <span class="text-xs flex items-center gap-1 justify-start font-medium">
+              My Portfolio <span>↗</span>
+            </span>
+        </a>
+
+      </div>
+
+    </div>
+
+        <section>
+          <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Education</h2>
+          <div class="space-y-10">
             <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-            <span class="text-gray-500 text-sm">Tools</span>
-            <div class="flex flex-wrap gap-2">
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Illustrator</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Photoshop</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">After Effects</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Figma</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">VS Code</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">ChatGPT</span>
-              <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Claude</span>
+              <span class="text-gray-500 text-sm tabular-nums">2021 — 2025</span>
+              <div>
+                <h3 class="font-semibold text-base dark:text-white">
+                  Bachelor Degree of Film and Television
+                  <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Padjadjaran University
+                </h3>
+                <p class="text-gray-500 text-sm">Bandung, ID</p>
+                <p class="text-gray-500 dark:text-gray-300 text-sm mt-1 font-medium">GPA 3.71 / 4.00</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section>
+          <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Experience</h2>
+          <div class="space-y-8">
+            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
+              <span class="text-gray-500 text-sm tabular-nums">Oct 2025 — Present</span>
+              <div>
+                <h3 class="font-semibold text-base dark:text-white">Graphic Designer 
+                  <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Loan Market
+                </h3>
+                <p class="text-gray-500 text-sm">Jakarta, ID</p>
+                <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
+                Created visual assets for marketing campaigns and communications. Developed social media content, flyers, invitations, and graphics for web and print. Worked with teams to ensure consistent visual communication.              </p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
+              <span class="text-gray-500 text-sm tabular-nums">Aug 2025 — Sep 2025</span>
+              <div>
+                <h3 class="font-semibold text-base dark:text-white">Creative Designer 
+                  <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Observisual
+                </h3>
+                <p class="text-gray-500 text-sm">Bandung, ID</p>
+                <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
+                Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement. I also collaborated closely with Strategic and Project Managers to deliver high-quality creative outputs on time across multiple campaigns.              </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
+              <span class="text-gray-500 text-sm tabular-nums">Aug 2023 — Feb 2024</span>
+              <div>
+                <h3 class="font-semibold text-base dark:text-white">Motion Graphic Designer 
+                  <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Vidio
+                </h3>
+                <p class="text-gray-500 text-sm">Jakarta, ID</p>
+                <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
+                As a Motion Graphic Designer, I produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.              </p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
+              <span class="text-gray-500 text-sm tabular-nums">Mar 2023 — Jun 2023</span>
+              <div>
+                <h3 class="font-semibold text-base dark:text-white">Creative Designer 
+                  <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Gikslab
+                </h3>
+                <p class="text-gray-500 text-sm">Bandung, ID</p>
+                <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
+                As a Creative Designer, I created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.              </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Skill & Tools</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
+              <span class="text-gray-500 text-sm">Skill</span>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Graphic Design</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Motion Graphic</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">UI/UX Design</span>
+              </div>
+            </div>
+              <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
+              <span class="text-gray-500 text-sm">Tools</span>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Illustrator</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Photoshop</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">After Effects</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Figma</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">VS Code</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">ChatGPT</span>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Claude</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
-</div>
 
   <script>
+    // ── GLASS POCKET POSITIONING ──────────────────────────────────────────────
+    // Reads the card stack's bounding box and positions the glass so its top
+    // edge sits at the vertical midpoint of the stack — "cards in a pocket".
+
+    function positionGlass() {
+      const stack = document.getElementById('cardStack');
+      const glass = document.getElementById('blurGlass');
+      if (!stack || !glass) return;
+
+      const rect = stack.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 1.7;
+
+      glass.style.top = midpoint + 'px';
+    }
+
+    // Run on load, after fonts/images settle, and on resize
+    window.addEventListener('DOMContentLoaded', () => {
+      positionGlass();
+      // Small delay to let Tailwind + layout fully settle
+      setTimeout(positionGlass, 100);
+    });
+    window.addEventListener('resize', positionGlass);
+    window.addEventListener('load', positionGlass);
+
+
+    // ── THEME ─────────────────────────────────────────────────────────────────
     function toggleTheme(btn) {
       document.documentElement.classList.toggle('dark');
       btn.classList.add('just-clicked');
       btn.addEventListener('mouseleave', () => btn.classList.remove('just-clicked'), { once: true });
     }
 
+    // ── CV TOGGLE ─────────────────────────────────────────────────────────────
     function togglePage() {
       const isOpen = document.body.classList.contains("cv-active");
       isOpen ? closeCV() : openCV();
@@ -339,6 +382,8 @@
       document.querySelector(".cv-modal").classList.remove("opacity-0", "pointer-events-none");
       document.querySelector(".cv-modal").classList.add("opacity-100");
       document.getElementById("pageToggle").innerText = "Work";
+      document.getElementById("blurGlass").style.opacity = "0";
+      document.getElementById("copyright").style.opacity = "0";
     }
 
     function closeCV() {
@@ -347,6 +392,8 @@
       document.querySelector(".cv-modal").classList.add("opacity-0", "pointer-events-none");
       document.querySelector(".cv-modal").classList.remove("opacity-100");
       document.getElementById("pageToggle").innerText = "About";
+      document.getElementById("blurGlass").style.opacity = "1";
+      document.getElementById("copyright").style.opacity = "1";
     }
   </script>
 
