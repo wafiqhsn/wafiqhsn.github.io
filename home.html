@@ -149,6 +149,48 @@
     .floating-item:nth-child(3) {animation-delay: 0.2s;}
     .floating-item:nth-child(4) {animation-delay: 0.3s;}
 
+    #word-wrapper {
+  height: 1.2em;
+  transition: width 0.8s ease;
+}
+
+#word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.slide-out {
+  animation: slideOut 0.4s forwards;
+}
+
+.slide-in {
+  animation: slideIn 0.4s forwards;
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
   </style>
 </head>
 
@@ -160,13 +202,13 @@
   <div class="main-content min-h-screen flex flex-col pt-40 relative">
     <div class="text-center max-w-4xl px-10 flex flex-col items-center relative z-10 mx-auto flex-none mb-2 sm:mb-6 md:mb-10">
       <h1 class="text-xl sm:text-4xl leading-[2rem] mb-3 text-black dark:text-gray-300">
-        Hi! I am Piko
+        Hi! I am Wafiq
 
         <span class="inline-flex items-center gap-[0.4em] px-[0.5em] py-[0.1em] rounded-[0.2em] bg-gray-300 h-[1.2em] align-middle overflow-hidden flex-none">
-          <img src="Images/Profpic.png" alt="Foto Adit" class="h-full aspect-[3/4] object-cover object-top scale-[1.5] translate-y-[25%] rounded-sm" />
+          <img src="Images/Profpic.png" alt="Foto Wafiq" class="h-full aspect-[3/4] object-cover object-top scale-[1.5] translate-y-[25%] rounded-sm" />
         </span>
 
-         A multidisciplinary designer ✏️ based in Jakarta
+         A Multidiscplinary designer ✏️ based in Jakarta
          
         <span class="inline-flex items-center align-middle mx-1 flex-none">
           <svg width="1.5em" height="1.5em" viewBox="0 0 71 50" fill="none" xmlns="http://www.w3.org/2000/svg">
