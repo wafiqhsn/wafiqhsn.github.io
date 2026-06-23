@@ -1,0 +1,296 @@
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+
+  <script>
+  const API_KEY = "57700d069f0f6393a652370bf2f79427";
+  const USERNAME = "wafiqhsn";
+
+  async function loadAlbumCover() {
+    try {
+      const response = await fetch(
+        `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1`
+      );
+
+      const data = await response.json();
+      const track = data.recenttracks.track[0];
+
+      const cover =
+        track.image[3]["#text"] ||
+        track.image[2]["#text"] ||
+        track.image[1]["#text"];
+
+      if (cover) {
+        const img = document.getElementById("albumCover");
+        const placeholder = document.getElementById("albumPlaceholder");
+
+        img.src = cover;
+        img.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  loadAlbumCover();
+  setInterval(loadAlbumCover, 30000);
+  </script>
+
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .blur-active .main-content {
+      filter: blur(25px);
+      opacity: 0.3;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    /* ===== Manual glassmorphism fix =====
+       #glassPanel below relies on Tailwind CDN classes
+       (backdrop-blur-[30px], bg-white/50, dark:bg-black/40, ...).
+       Tailwind CDN compiles classes via JIT scan in the browser,
+       so every time this page is injected via innerHTML (tab switch)
+       or dark mode is toggled, there's a noticeable delay before
+       the blur/background applies. Defining the same look here as
+       plain CSS makes it apply instantly on first paint, with the
+       Tailwind classes left in place as a harmless fallback once the
+       CDN catches up.
+       The color itself, however, is given its OWN explicit `transition`
+       below (matching body's transition-colors duration-500) so that
+       when dark mode toggles, this panel eases its color at the exact
+       same speed as the rest of the page instead of snapping instantly
+       while everything else fades — that mismatch was what made the
+       panel "flash" visible during the light/dark switch. */
+    #glassPanel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      /* extend past parent's pb-10 (40px) PLUS the floating cards' own
+         offsets (translate-y-12 = 48px, rotation overshoot, etc).
+         140px was calibrated for cardStack at its full scale (lg:scale-100).
+         Since cardStack shrinks via `scale-[0.45] sm:scale-75 md:scale-90
+         lg:scale-100`, the cards' overshoot below the fold shrinks with it —
+         so this value is scaled down to match per breakpoint below. Without
+         that, mobile kept the full 140px reach meant for full-size cards,
+         leaving a long stretch of empty glass at the bottom of the page.
+         Tune this single value if any card edge still peeks out below the blur. */
+      --glass-extra-reach: 0px;
+      bottom: calc(-40px - var(--glass-extra-reach));
+      top: 55%;
+      background-color: rgba(255, 255, 255, 0.5);
+      -webkit-backdrop-filter: blur(25px);
+      backdrop-filter: blur(25px);
+      border-top: 2px solid rgba(255, 255, 255, 0.7);
+      z-index: 50;
+      pointer-events: none;
+      /* Match body's `transition-colors duration-500` (Tailwind = 500ms ease)
+         so the panel's color fades in lockstep with the page background
+         instead of switching instantly while everything else eases. */
+      transition: background-color 0.3s ease, border-top-color 0.3s ease;
+    }
+
+    html.dark #glassPanel {
+      background-color: rgba(0, 0, 0, 0.4);
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* sm: cardStack scale-75 */
+    @media (min-width: 640px) {
+      #glassPanel {
+        --glass-extra-reach: 105px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      #glassPanel {
+        top: 70%;
+        /* md: cardStack scale-90 */
+        --glass-extra-reach: 126px;
+      }
+    }
+
+    /* lg: cardStack scale-100 (full size, original calibrated value) */
+    @media (min-width: 1024px) {
+      #glassPanel {
+        --glass-extra-reach: 140px;
+      }
+    }
+
+    .floating-item {
+    animation: riseBounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    @keyframes riseBounce {
+      0% {
+        opacity: 0;
+        translate: 0 80px;
+      }
+
+      70% {
+        opacity: 1;
+        translate: 0 -12px;
+      }
+
+      100% {
+        opacity: 1;
+        translate: 0 0;
+      }
+    }
+
+    .floating-item:nth-child(1) {animation-delay: 0s;}
+    .floating-item:nth-child(2) {animation-delay: 0.1s;}
+    .floating-item:nth-child(3) {animation-delay: 0.2s;}
+    .floating-item:nth-child(4) {animation-delay: 0.3s;}
+
+  </style>
+</head>
+
+<body class="bg-white text-gray-900 dark:bg-black dark:text-gray-100 antialiased overflow-x-hidden transition-colors duration-500">
+
+  <div id="blurGlass"></div>
+  <div id="copyright" class="fixed bottom-3 left-0 w-full text-center text-sm text-gray-500 dark:text-gray-400 z-[300] pointer-events-none transition-all duration-500">©2026 Wafiq Hasan</div>
+
+  <div class="main-content min-h-screen flex flex-col pt-40 relative">
+    <div class="text-center max-w-4xl px-10 flex flex-col items-center relative z-10 mx-auto flex-none mb-2 sm:mb-6 md:mb-10">
+      <h1 class="text-xl sm:text-4xl leading-[2rem] mb-3 text-black dark:text-gray-300">
+        Hi! I am Piko
+
+        <span class="inline-flex items-center gap-[0.4em] px-[0.5em] py-[0.1em] rounded-[0.2em] bg-gray-300 h-[1.2em] align-middle overflow-hidden flex-none">
+          <img src="Images/Profpic.png" alt="Foto Adit" class="h-full aspect-[3/4] object-cover object-top scale-[1.5] translate-y-[25%] rounded-sm" />
+        </span>
+
+         A multidisciplinary designer ✏️ based in Jakarta
+         
+        <span class="inline-flex items-center align-middle mx-1 flex-none">
+          <svg width="1.5em" height="1.5em" viewBox="0 0 71 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" width="45" height="50" rx="5" fill="#1F97D4"/>
+          <rect y="4" width="71" height="46" rx="4" fill="#76D0F5"/>
+          <ellipse cx="44.4515" cy="25.2387" rx="8.45147" ry="14.7155" fill="white"/>
+          <ellipse cx="41" cy="25.2383" rx="5" ry="9" fill="black"/>
+          <ellipse cx="26.4529" cy="25.2385" rx="8.45147" ry="14.7155" fill="white"/>
+          <ellipse cx="23" cy="25.2383" rx="5" ry="9" fill="black"/>
+          </svg>
+        </span>
+
+        I believe in form follows function and a little bit of fun🌲
+      </h1>
+
+      <div class="flex justify-center gap-1">
+        <a 
+          id="heroButton"
+          href="mailto:wafiqhasan10@gmail.com" 
+          class="group inline-flex items-center w-fit px-3 py-0.5 text-sm sm:text-xl truncate font-medium rounded-full bg-black text-white dark:bg-zinc-800 border border border-transparent dark:border-zinc-700 hover:bg-yellow-400 hover:text-black dark:hover:bg-yellow-400 dark:hover:text-black active:scale-95 transition-all duration-200">
+          <span class="flex items-center gap-1 whitespace-nowrap">
+            <span id="heroButtonText">Let's Collaborate!</span>
+
+            <span 
+              id="heroButtonEmoji"
+              class="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-1 transition-all duration-300">
+              📩
+            </span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="w-full flex items-start justify-center relative pb-10">
+
+    <div id="glassPanel" class="absolute left-0 right-0 top-[55%] md:top-[70%] bg-white/50 dark:bg-black/40 backdrop-blur-[30px] border-t-2 border-white/70 dark:border-white/10 z-50 pointer-events-none"></div>
+    
+      <div id="cardStack" class="relative flex flex-nowrap justify-center items-center -space-x-24 sm:-space-x-12 w-full mx-auto px-4 z-20 mt-2 sm:mt-6 md:mt-10 scale-[0.45] sm:scale-75 md:scale-90 lg:scale-100 transition-transform duration-500 origin-center">
+
+        <a
+          href="https://open.spotify.com/user/exo6k0vh52vbopuqnrtx3j3jp?si=13e14f5090d74d0c"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="floating-item relative z-10 w-44 h-44 rotate-12 translate-y-4 rounded-full flex-none transition-[transform] duration-500 hover:-translate-y-6 hover:rotate-0 cursor-pointer"
+        >
+          <div class="relative w-full h-full bg-stone-200 rounded-[30px] overflow-hidden flex items-center justify-center p-3">
+            <div class="relative w-full h-full rounded-full animate-[spin_5s_linear_infinite]">
+              <div class="absolute inset-0 rounded-full bg-[conic-gradient(from_180deg_at_50.00%_50.00%,_#333333_0deg,_#4D4D4D_39deg,_#666666_79deg,_#808080_118deg,_#8C8C8C_138deg,_#737373_201deg,_#333333_261deg,_#8C8C8C_317deg,_#333333_360deg)]"></div>
+              <div class="absolute inset-0 m-auto w-[82%] h-[82%] opacity-20 rounded-full border border-black"></div>
+              <div class="absolute inset-0 m-auto w-[64%] h-[64%] bg-zinc-900 rounded-full"></div>
+              <div
+                id="albumPlaceholder"
+                class="absolute inset-0 m-auto w-[60%] h-[60%] rounded-full bg-yellow-400">
+              </div>
+
+              <img
+                id="albumCover"
+                class="absolute inset-0 m-auto w-[60%] h-[60%] rounded-full object-cover hidden"
+              >
+            </div>
+          </div>
+        </a>
+
+        <a
+          href="#" onclick="event.preventDefault(); window.navigateTo('about.html')"
+          class="floating-item relative w-[340px] h-[288px] z-20 rotate-12 flex-none transition-[transform] duration-500 hover:-translate-y-8 hover:rotate-0 cursor-pointer"
+        >
+          <div class="absolute left-[36px] top-[28px] w-[304px] h-[264px] z-20 bg-[#FFFECF] overflow-hidden">
+            <div class="p-5 text-left text-black text-xl leading-normal">
+              i think there's something beautiful about not having everything figured out yet, even when it feels confusing sometimes 🌱 still figuring things out
+            </div>
+          </div>
+
+          <div class="absolute left-[28px] top-[36px] z-20">
+            <div class="bg-[#efefef] pt-[8px] px-[8px] pb-[20px] shadow-sm">
+              <img src="Images/Profile.png" alt="Photo" class="w-[104px] h-[124px] object-cover bg-[#bcc2c8]">
+            </div>
+          </div>
+
+          <div class="absolute left-[48px] top-[7px] rotate-12 z-30">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="76" fill="none" viewBox="0 0 20 74" class="overflow-visible">
+              <path stroke="url(#a)" stroke-width="2" d="M1 37v27a9 9 0 1 0 18 0V10a9 9 0 1 0-18 0v9" />
+              <defs>
+                <linearGradient id="a" x1="9.6" x2="9.6" y1=".6" y2="72.6" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#eee" />
+                  <stop offset="1" stop-color="#666" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </a>
+
+        <a
+          href="#" onclick="event.preventDefault(); window.navigateTo('work.html')"
+          class="floating-item relative z-40 w-72 h-72 -rotate-6 flex-none transition-[transform] duration-500 hover:-translate-y-8 hover:rotate-0 cursor-pointer"
+          >
+          <svg class="absolute top-[8%] left-0 w-full h-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 295 240">
+            <path fill="#1f97d4" d="M275 239H19a19 19 0 0 1-19-18V19A19 19 0 0 1 19 0h113a19 19 0 0 1 14 6l22 25a19 19 0 0 0 14 6h93a19 19 0 0 1 19 19v165a19 19 0 0 1-19 18"/>
+          </svg>
+              <div class="absolute inset-0 z-10 pointer-events-none">
+                <img class="absolute left-[8%] top-[20%] w-[32%] h-[55%] z-[1]" src="Projects/LM.png" alt="Loan Market" />
+                <img class="absolute right-[6%] top-[26%] w-[36%] h-[50%] z-[1]" src="Projects/Kirimaja.png" alt="Kirimaja" /> 
+                <img class="absolute left-[31%] top-[14%] w-[40%] h-[58%] z-[2]" src="Projects/Vidio.png" alt="Vidio" />
+                <img class="absolute left-[18%] top-[42%] w-[38%] h-[35%] z-[3]" src="Projects/Prabu.png" alt="Prabu" />
+                <img class="absolute right-[10%] top-[39%] w-[38%] h-[38%] z-[3]" src="Projects/SCE.png" alt="Smansaku" />
+              </div>
+          <div class="absolute bottom-0 left-0 w-full h-[52%] bg-gradient-to-b from-sky-300 to-sky-500 rounded-b-2xl z-20"></div>
+        </a>
+
+        <a
+          href="https://instagram.com/wafiqhsn"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="floating-item relative z-30 h-60 w-fit rotate-12 translate-y-12 flex-none transition-[transform] duration-500 hover:-translate-y-8 hover:rotate-0 cursor-pointer"
+          >
+          <img src="Images/Photo.jpg" alt="Photo" class="absolute top-1/2 left-1/2 w-[77%] h-[80%] object-cover rounded-lg -translate-x-1/2 -translate-y-1/2 z-40" />
+          <svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 2" viewBox="0 0 203.5 277.8" class="relative z-30 h-full w-auto">
+            <path d="M196 264q0-8 8-8v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16V78a8 8 0 0 1 0-16V51a8 8 0 0 1 0-17V23a8 8 0 0 1 0-16V0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-16 0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-17 0H82a8 8 0 0 1-16 0H55a8 8 0 0 1-17 0H27q-1 8-8 8-10 0-9-8H0v7a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v6h10a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11v-6q-8-1-8-8" fill="#FFE500" />
+          </svg>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Piko Portfolio</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class"
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    /* ===== Migrated from style.css ===== */
+    /* NOTE: rules below (.nav-links, body.dark, nav, .page, .fade-out)
+       targeted the old pre-Tailwind markup and are currently unused
+       since index.html/home.html now use Tailwind utility classes
+       (e.g. dark:bg-black, fixed top-3...). Kept as-is per request;
+       safe to delete if confirmed unused. */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body.dark {
+      background: #111;
+      color: white;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 24px 48px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .nav-links a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      max-width: 1000px;
+      margin: auto;
+      padding: 60px;
+    }
+
+    .fade-out {
+      opacity: 0;
+      transition: .15s;
+    }
+
+  </style>
+</head>
+
+<body class="bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
+
+  <!-- NAVBAR -->
+
+  <div
+  id="navbar"
+  class="fixed top-3 left-1/2 -translate-x-1/2 z-[9999]
+  transition-all duration-500
+  ease-[cubic-bezier(0.22,1,0.36,1)]">
+    <nav class="bg-yellow-400 rounded-full p-1 flex items-center gap-[4px] relative transition-colors duration-300">
+
+      <div
+        id="navPill"
+        class="absolute left-0 top-0 bg-white rounded-full
+        transition-[transform,width,height]
+        duration-500
+        ease-[cubic-bezier(0.22,1,0.36,1)]
+        z-0 pointer-events-none">
+      </div>
+
+      <a href="#" data-page="home.html" class="nav-link relative z-10 text-[12px] md:text-[16px] text-black font-medium px-2 md:px-2 py-[2px] md:py-0 rounded-full transition-colors duration-300">Home</a>
+      <a href="#" data-page="work.html" class="nav-link relative z-10 text-[12px] md:text-[16px] text-black font-medium px-2 md:px-2 py-[2px] md:py-0 rounded-full transition-colors duration-300">Work</a>
+      <a href="#" data-page="about.html" class="nav-link relative z-10 text-[12px] md:text-[16px] text-black font-medium px-2 md:px-2 py-[2px] md:py-0 rounded-full transition-colors duration-300">About</a>
+
+      <button
+        id="themeToggle"
+        aria-label="Toggle Dark Mode"
+        class="relative w-6 h-5 flex items-center justify-center overflow-hidden text-black rounded-full ml-1">
+
+        <!-- SUN -->
+        <svg class="absolute w-3 h-3 md:w-4 md:h-4 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] translate-y-0 dark:translate-y-10"
+          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"/><path d="M12 20v2"/>
+          <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+          <path d="M2 12h2"/><path d="M20 12h2"/>
+          <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+
+        <!-- MOON -->
+        <svg class="absolute w-3 h-3 md:w-4 md:h-4 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] -translate-y-10 dark:translate-y-0"
+          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+
+    </nav>
+  </div>
+
+
+  <!-- CONTENT -->
+
+  <main id="content" class="min-h-screen transition-opacity duration-300"></main>
+
+  <script>
+    const content =
+    document.getElementById("content");
+
+    const navLinks =
+    document.querySelectorAll(".nav-link");
+
+    const navPill =
+    document.getElementById("navPill");
+
+    // Simpan referensi tab yang sedang aktif supaya bisa
+    // dipakai ulang saat layar di-resize
+    let activeLink = null;
+
+    function movePill(link){
+
+      activeLink = link;
+
+      navPill.style.width =
+        `${link.offsetWidth}px`;
+
+      navPill.style.height =
+        `${link.offsetHeight}px`;
+
+      navPill.style.transform =
+        `translate(${link.offsetLeft}px,${link.offsetTop}px)`;
+
+      navLinks.forEach(item=>{
+
+        item.classList.remove("text-black");
+        item.classList.add("text-black");
+
+      });
+
+      link.classList.remove("text-black");
+      link.classList.add("text-black");
+    }
+
+    // Jalankan semua <script> yang ada di dalam konten yang baru diinjeksi
+    function runScripts(container){
+      container.querySelectorAll("script").forEach(oldScript => {
+        const newScript = document.createElement("script");
+        newScript.textContent = oldScript.textContent;
+        document.body.appendChild(newScript);
+        document.body.removeChild(newScript);
+      });
+    }
+
+    // Tunggu semua <img> di dalam container selesai load (atau gagal,
+    // supaya tidak nge-hang kalau ada src yang putus) sebelum dianggap "siap".
+    // Tanpa ini, opacity di-set ke 1 sementara foto-foto di belakang
+    // #glassPanel masih kosong/belum decode, jadi backdrop-blur sempat
+    // terlihat seperti "hilang" sepersekian detik karena tidak ada
+    // konten untuk diburamkan di baliknya.
+    function waitForImages(container){
+      const imgs = Array.from(container.querySelectorAll("img"));
+
+      const pending = imgs
+        .filter(img => !img.complete)
+        .map(img => new Promise(resolve => {
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+        }));
+
+      return Promise.all(pending);
+    }
+
+    async function loadPage(page){
+
+      content.style.opacity = 0;
+
+      const res =
+        await fetch(page);
+
+      const html =
+        await res.text();
+
+      setTimeout(async ()=>{
+
+        content.innerHTML = html;
+
+        // Jalankan script dari halaman yang diinjeksi sebelum fade-in,
+        // supaya kalau ada penyesuaian layout/posisi dari script tsb,
+        // itu sudah selesai sebelum user melihat kontennya.
+        runScripts(content);
+
+        // Tunggu gambar-gambar siap dulu, baru fade-in. Ini yang
+        // menghilangkan kedipan "glass hilang sesaat" saat pindah tab.
+        await waitForImages(content);
+
+        content.style.opacity = 1;
+
+      },150);
+
+    }
+
+    navLinks.forEach(link=>{
+
+      link.addEventListener("click",(e)=>{
+
+        e.preventDefault();
+
+        movePill(link);
+
+        loadPage(
+          link.dataset.page
+        );
+
+      });
+
+    });
+
+    window.addEventListener("load",()=>{
+
+      movePill(navLinks[0]);
+
+      loadPage("home.html");
+
+    });
+
+    window.navigateTo = function(page) {
+      const targetLink = Array.from(navLinks).find(l => l.dataset.page === page);
+      if (targetLink) movePill(targetLink);
+      loadPage(page);
+    };
+
+    // FIX: nav-pill telat menyesuaikan ukuran saat resize layar.
+    // Sebelumnya ukuran/posisi pill cuma dihitung sekali saat tab
+    // di-klik (lewat movePill), jadi saat breakpoint Tailwind berubah
+    // (mis. text-[12px] -> md:text-[16px]) ukuran <a> ikut berubah
+    // tapi pill tidak ikut, sampai user klik tab lain.
+    // Solusi: hitung ulang movePill() untuk tab aktif setiap resize,
+    // di-debounce dikit biar gak terlalu sering jalan saat drag-resize.
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+
+      clearTimeout(resizeTimeout);
+
+      resizeTimeout = setTimeout(() => {
+
+        if (activeLink) {
+          movePill(activeLink);
+        }
+
+      }, 50);
+
+    });
+
+    const themeToggle =
+    document.getElementById("themeToggle");
+
+    themeToggle.addEventListener("click",()=>{
+
+      document.documentElement
+        .classList.toggle("dark");
+
+    });
+  </script>
+
+</body>
+</html>
