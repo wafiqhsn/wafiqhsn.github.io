@@ -1,186 +1,346 @@
-<section id="about" class="max-w-7xl mx-auto px-8 py-16 lg:pt-24">
+<script>
+  (() => {
+    // PAGE DATA: edit experience, education, skills, and tools here.
+    const experience = [
+      {
+        period: "Oct 2025 — Present",
+        role: "Graphic Designer",
+        company: "Loan Market",
+        location: "Jakarta, ID",
+        description:
+          "Created visual assets for marketing campaigns and communications. Developed social media content, flyers, invitations, and graphics for web and print. Worked with teams to ensure consistent visual communication.",
+      },
+      {
+        period: "Aug 2025 — Sep 2025",
+        role: "Creative Designer",
+        company: "Observisual",
+        location: "Bandung, ID",
+        description:
+          "Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement. I also collaborated closely with Strategic and Project Managers to deliver high-quality creative outputs on time across multiple campaigns.",
+      },
+      {
+        period: "Aug 2023 — Feb 2024",
+        role: "Motion Graphic Designer",
+        company: "Vidio",
+        location: "Jakarta, ID",
+        description:
+          "As a Motion Graphic Designer, I produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.",
+      },
+      {
+        period: "Mar 2023 — Jun 2023",
+        role: "Creative Designer",
+        company: "Gikslab",
+        location: "Bandung, ID",
+        description:
+          "As a Creative Designer, I created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.",
+      },
+    ];
 
-  <div class="flex flex-col lg:flex-row lg:items-start gap-12">
+    const education = [
+      {
+        period: "2021 — 2025",
+        degree: "Bachelor of Communication",
+        institution: "Padjadjaran University",
+        location: "Bandung, ID",
+        detail: "GPA 3.71 / 4.00",
+      },
+    ];
 
-    <!-- KOLOM KIRI (desktop) -->
-    <div class="w-full lg:w-[500px] flex flex-col gap-12 order-1">
+    const skills = ["Graphic Design", "Motion Graphic", "UI/UX Design"];
+    const tools = [
+      "Illustrator",
+      "Photoshop",
+      "After Effects",
+      "Figma",
+      "VS Code",
+      "ChatGPT",
+      "Claude",
+    ];
 
-      <!-- CARD -->
-      <aside class="h-fit">
-        <div class="relative w-full h-[200px] lg:h-[300px] bg-[#c7c7d3] dark:bg-[#2A2A2A] rounded-xl overflow-hidden">
-          <div class="absolute inset-x-0 bottom-2 z-0 overflow-hidden flex justify-center">
-            <h2 class="text-[72px] lg:text-[96px] font-bold leading-none tracking-tighter text-white whitespace-nowrap">
-              Creative Designer
-            </h2>
+    // SHARED STYLES: change each item type in one place.
+    const styles = {
+      row: "grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline",
+      heading: "text-base font-medium mb-3 dark:text-white pb-2",
+      title: "font-semibold text-base dark:text-white",
+      muted: "text-gray-500 text-sm",
+      badge:
+        "px-3 py-1 bg-gray-200 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-[13px] font-medium",
+    };
+
+    function escapeHtml(value) {
+      const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+      return String(value).replace(/[&<>"']/g, (character) => entities[character]);
+    }
+
+    // Shared layout for work and education entries.
+    function createTimelineItem({
+      period,
+      title,
+      organization,
+      location,
+      description = "",
+      detail = "",
+    }) {
+      return `
+        <div class="${styles.row}">
+          <span class="${styles.muted} tabular-nums">${escapeHtml(period)}</span>
+          <div>
+            <h3 class="${styles.title}">
+              ${escapeHtml(title)}
+              <span class="font-normal text-gray-700 dark:text-gray-400">at</span>
+              ${escapeHtml(organization)}
+            </h3>
+            <p class="${styles.muted}">${escapeHtml(location)}</p>
+            ${description ? `<p class="text-[15px] mt-2 font-normal leading-[1.6] text-gray-600 dark:text-gray-300">${escapeHtml(description)}</p>` : ""}
+            ${detail ? `<p class="text-gray-500 dark:text-gray-300 text-sm mt-1 font-medium">${escapeHtml(detail)}</p>` : ""}
           </div>
-          <div class="absolute top-4 left-4 right-4 z-20 text-white">
-            <div class="grid grid-cols-2 gap-y-1">
-              <h3 class="text-sm lg:text-xl font-semibold">Wafiq Hasan</h3>
-              <a href="mailto:wafiqhasan10@gmail.com" class="text-xs lg:text-lg opacity-80 text-right">Mail</a>
-              <p class="text-xs lg:text-lg opacity-80">Jakarta, ID</p>
-              <a href="https://wa.me/6285290402449" target="_blank" rel="noopener noreferrer" class="text-xs lg:text-lg opacity-80 text-right">Phone</a>
-            </div>
-          </div>
-          <img
-            src="Images/Profpic.png"
-            alt="Profile"
-            class="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 h-[190px] lg:h-[280px] object-contain"
-          />
         </div>
-      </aside>
+      `;
+    }
 
-      <!-- EDUCATION & SKILL, tampil di sini HANYA pas desktop -->
-      <div class="hidden lg:flex lg:flex-col lg:gap-12">
+    function createBadge(label) {
+      return `<span class="${styles.badge}">${escapeHtml(label)}</span>`;
+    }
+
+    // Shared badge layout for skills and tools.
+    function createBadgeRow(label, items) {
+      return `
+        <div class="${styles.row}">
+          <span class="${styles.muted}">${escapeHtml(label)}</span>
+          <div class="flex flex-wrap gap-2">${items.map(createBadge).join("")}</div>
+        </div>
+      `;
+    }
+
+    function createEducationAndSkills() {
+      return `
         <section>
-          <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Education</h2>
+          <h2 class="${styles.heading}">Education</h2>
           <div class="space-y-10">
-            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-              <span class="text-gray-500 text-sm tabular-nums">2021 — 2025</span>
-              <div>
-                <h3 class="font-semibold text-base dark:text-white">
-                  Bachelor of Communication
-                  <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Padjadjaran University
-                </h3>
-                <p class="text-gray-500 text-sm">Bandung, ID</p>
-                <p class="text-gray-500 dark:text-gray-300 text-sm mt-1 font-medium">GPA 3.71 / 4.00</p>
-              </div>
-            </div>
+            ${education
+              .map((item) =>
+                createTimelineItem({
+                  ...item,
+                  title: item.degree,
+                  organization: item.institution,
+                }),
+              )
+              .join("")}
           </div>
         </section>
-
         <section>
-          <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Skill & Tools</h2>
+          <h2 class="${styles.heading}">Skill & Tools</h2>
           <div class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-              <span class="text-gray-500 text-sm">Skill</span>
-              <div class="flex flex-wrap gap-2">
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Graphic Design</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Motion Graphic</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">UI/UX Design</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-              <span class="text-gray-500 text-sm">Tools</span>
-              <div class="flex flex-wrap gap-2">
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Illustrator</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Photoshop</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">After Effects</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Figma</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">VS Code</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">ChatGPT</span>
-                <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Claude</span>
-              </div>
-            </div>
+            ${createBadgeRow("Skill", skills)}
+            ${createBadgeRow("Tools", tools)}
           </div>
         </section>
+      `;
+    }
+
+    // Mouse tilt; disabled for touch and reduced motion.
+    function setupProfileTilt(about) {
+      const surface = about.querySelector("[data-profile-tilt]");
+      if (!surface || surface.dataset.tiltReady) return;
+      surface.dataset.tiltReady = "true";
+      const card = surface.querySelector("[data-profile-card]");
+      const canTilt = window.matchMedia(
+        "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+      );
+
+      function resetTilt() {
+        card.style.removeProperty("--tilt-x");
+        card.style.removeProperty("--tilt-y");
+        card.style.removeProperty("--shadow-x");
+        card.style.removeProperty("--shadow-y");
+        card.removeAttribute("data-tilting");
+      }
+
+      surface.addEventListener("pointermove", (event) => {
+        if (!canTilt.matches || event.pointerType !== "mouse") {
+          resetTilt();
+          return;
+        }
+        // Measure the fixed wrapper to keep tilt stable.
+        const bounds = surface.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1));
+        const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1));
+        card.style.setProperty("--tilt-x", `${-y * 7}deg`);
+        card.style.setProperty("--tilt-y", `${x * 7}deg`);
+        card.style.setProperty("--shadow-x", `${-x * 10}px`);
+        card.style.setProperty("--shadow-y", `${18 - y * 6}px`);
+        card.setAttribute("data-tilting", "");
+      });
+      surface.addEventListener("pointerleave", resetTilt);
+      surface.addEventListener("pointercancel", resetTilt);
+    }
+
+    // Render both responsive layouts from the data above.
+    function renderAbout() {
+      const about = document.getElementById("about");
+      if (!about) return;
+      setupProfileTilt(about);
+
+      about.querySelector("[data-experience]").innerHTML = `
+        <h2 class="${styles.heading}">Work Experience</h2>
+        <div class="space-y-8">
+          ${experience
+            .map((item) =>
+              createTimelineItem({
+                ...item,
+                title: item.role,
+                organization: item.company,
+              }),
+            )
+            .join("")}
+        </div>
+      `;
+
+      const educationAndSkills = createEducationAndSkills();
+      about.querySelectorAll("[data-education-skills]").forEach((container) => {
+        container.innerHTML = educationAndSkills;
+      });
+    }
+
+    // Initialize on tab navigation or direct page load.
+    if (document.getElementById("about")) {
+      renderAbout();
+    } else if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", renderAbout, { once: true });
+    }
+  })();
+</script>
+
+<style>
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    #about [data-profile-tilt] {
+      perspective: 1000px;
+    }
+
+    #about [data-profile-card] {
+      transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transition:
+        transform 350ms ease-out,
+        box-shadow 350ms ease-out;
+    }
+
+    #about [data-profile-card][data-tilting] {
+      transition-duration: 120ms;
+      box-shadow: var(--shadow-x, 0px) var(--shadow-y, 18px) 32px -12px rgb(0 0 0 / 0%);
+    }
+
+    /* Light sweep overlay; links remain clickable. */
+    #about [data-profile-shine] {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      overflow: hidden;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    #about [data-profile-shine]::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 25%,
+        rgb(255 255 255 / 8%) 40%,
+        rgb(255 255 255 / 28%) 50%,
+        rgb(255 255 255 / 8%) 60%,
+        transparent 75%
+      );
+      transform: translateX(-120%);
+    }
+
+    #about [data-profile-tilt]:hover [data-profile-shine]::after {
+      animation: about-profile-light-sweep 850ms ease-in-out both;
+    }
+
+    @keyframes about-profile-light-sweep {
+      from {
+        transform: translateX(-120%);
+      }
+      to {
+        transform: translateX(120%);
+      }
+    }
+  }
+</style>
+
+<section id="about" class="max-w-7xl mx-auto px-8 pt-24 pb-16 sm:pt-16 lg:pt-24">
+  <div class="flex flex-col lg:flex-row lg:items-start gap-12">
+    <div class="w-full lg:w-[500px] flex flex-col gap-12 order-1">
+      <div>
+        <aside data-profile-tilt class="h-fit">
+          <div data-profile-card class="relative w-full h-[200px] lg:h-[300px] rounded-xl">
+            <div
+              aria-hidden="true"
+              class="absolute inset-0 bg-[#c7c7d3] dark:bg-[#2A2A2A] rounded-xl pointer-events-none"
+            ></div>
+            <div class="absolute inset-x-0 bottom-2 z-0 overflow-hidden flex justify-center">
+              <h2
+                class="text-[72px] lg:text-[96px] font-bold leading-none pb-[0.12em] tracking-tighter text-white whitespace-nowrap"
+              >
+                Creative Designer
+              </h2>
+            </div>
+            <div data-profile-details class="absolute top-4 left-4 right-4 z-20 text-white">
+              <div class="grid grid-cols-2 gap-y-1">
+                <h3 class="text-sm lg:text-xl font-semibold">Wafiq Hasan</h3>
+                <a
+                  href="mailto:wafiqhasan10@gmail.com"
+                  class="text-xs lg:text-lg opacity-80 text-right"
+                  >Mail</a
+                >
+                <p class="text-xs lg:text-lg opacity-80">Jakarta, ID</p>
+                <a
+                  href="https://wa.me/6285290402449"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-xs lg:text-lg opacity-80 text-right"
+                  >Phone</a
+                >
+              </div>
+            </div>
+            <img
+              data-profile-photo
+              src="Images/Profile.png"
+              alt="Profile"
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 h-[190px] lg:h-[280px] object-contain"
+            />
+            <span data-profile-shine aria-hidden="true"></span>
+          </div>
+        </aside>
+
+        <!-- Download links: update the file URLs here. -->
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <a
+            href="https://drive.google.com/file/d/1ptUa8NC2_C57vPdolugWmaEgKEF1b3-g/view?usp=drive_link"
+            target="_blank"
+            class="flex items-center justify-center rounded-full bg-gray-200 dark:bg-zinc-800 text-black dark:text-white px-2 py-1 text-sm sm:text-base leading-snug text-center transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            Download CV
+          </a>
+          <a
+            href="https://drive.google.com/file/d/1llZMCI6Dl_-RVUQu9ySJ4RSdKSjKFMhu/view?usp=drive_link"
+            target="_blank"
+            class="flex items-center justify-center rounded-full bg-[#FFE500] text-black px-2 py-1 text-sm sm:text-base leading-snug text-center transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            Download Portfolio
+          </a>
+        </div>
       </div>
 
+      <!-- Desktop education, skills, and tools -->
+      <div data-education-skills class="hidden lg:flex lg:flex-col lg:gap-12"></div>
     </div>
 
-    <!-- KOLOM KANAN: experience -->
-    <section class="flex-1 order-2">
-      <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Work Experience</h2>
-      <div class="space-y-8">
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm tabular-nums">Oct 2025 — Present</span>
-          <div>
-            <h3 class="font-semibold text-base dark:text-white">Graphic Designer 
-              <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Loan Market
-            </h3>
-            <p class="text-gray-500 text-sm">Jakarta, ID</p>
-            <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              Created visual assets for marketing campaigns and communications. Developed social media content, flyers, invitations, and graphics for web and print. Worked with teams to ensure consistent visual communication.
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm tabular-nums">Aug 2025 — Sep 2025</span>
-          <div>
-            <h3 class="font-semibold text-base dark:text-white">Creative Designer 
-              <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Observisual
-            </h3>
-            <p class="text-gray-500 text-sm">Bandung, ID</p>
-            <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement. I also collaborated closely with Strategic and Project Managers to deliver high-quality creative outputs on time across multiple campaigns.
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm tabular-nums">Aug 2023 — Feb 2024</span>
-          <div>
-            <h3 class="font-semibold text-base dark:text-white">Motion Graphic Designer 
-              <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Vidio
-            </h3>
-            <p class="text-gray-500 text-sm">Jakarta, ID</p>
-            <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              As a Motion Graphic Designer, I produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm tabular-nums">Mar 2023 — Jun 2023</span>
-          <div>
-            <h3 class="font-semibold text-base dark:text-white">Creative Designer 
-              <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Gikslab
-            </h3>
-            <p class="text-gray-500 text-sm">Bandung, ID</p>
-            <p class="text-sm mt-2 font-normal leading-relaxed text-gray-600 dark:text-gray-300">
-              As a Creative Designer, I created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    <section data-experience class="flex-1 order-2"></section>
   </div>
 
-  <!-- EDUCATION & SKILL versi mobile: tampil HANYA di bawah lg -->
-  <div class="lg:hidden flex flex-col gap-12 mt-12">
-    <section>
-      <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Education</h2>
-      <div class="space-y-10">
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm tabular-nums">2021 — 2025</span>
-          <div>
-            <h3 class="font-semibold text-base dark:text-white">
-              Bachelor of Communication
-              <span class="font-normal text-gray-700 dark:text-gray-400">at</span> Padjadjaran University
-            </h3>
-            <p class="text-gray-500 text-sm">Bandung, ID</p>
-            <p class="text-gray-500 dark:text-gray-300 text-sm mt-1 font-medium">GPA 3.71 / 4.00</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2 class="text-base font-medium mb-3 dark:text-white pb-2">Skill & Tools</h2>
-      <div class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm">Skill</span>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Graphic Design</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Motion Graphic</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">UI/UX Design</span>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-6 gap-y-2 items-baseline">
-          <span class="text-gray-500 text-sm">Tools</span>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Illustrator</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Photoshop</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">After Effects</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Figma</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">VS Code</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">ChatGPT</span>
-            <span class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-xs font-medium">Claude</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
+  <!-- Mobile layout using the same data and templates -->
+  <div data-education-skills class="lg:hidden flex flex-col gap-12 mt-12"></div>
 </section>
