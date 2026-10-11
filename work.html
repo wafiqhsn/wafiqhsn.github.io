@@ -116,7 +116,7 @@
               <img
                 src="${project.image}"
                 alt="${project.title}"
-                loading="lazy"
+                loading="eager"
                 class="w-full h-full object-cover"
               >
             </div>
@@ -199,6 +199,41 @@
     }
 
     // Render all project cards.
-    document.getElementById("project-grid").innerHTML = projects.map(createProjectCard).join("");
+    const grid = document.getElementById("project-grid");
+    grid.innerHTML = projects.map(createProjectCard).join("");
+
+    // Shuffle animation timing only; keep the project layout unchanged.
+    function animateProjectCards() {
+      if (!grid.isConnected || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const cards = Array.from(grid.children);
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      cards.forEach((card, order) => {
+        // Smooth upward entrance with randomized start times.
+        const animation = card.animate([
+          { opacity: 0, translate: "0 32px" },
+          { opacity: 1, translate: "0 0" },
+        ], {
+          duration: 1000,
+          delay: order * 35,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "both",
+        });
+        animation.finished.then(() => animation.cancel(), () => {});
+      });
+    }
+
+    // Start when the page is visible, after layout and image preparation.
+    const pageContainer = grid.closest("#content");
+    if (pageContainer) {
+      pageContainer.addEventListener("pagereveal", animateProjectCards, { once: true });
+      pageContainer.addEventListener("pageleave", () => {
+        pageContainer.removeEventListener("pagereveal", animateProjectCards);
+      }, { once: true });
+    } else {
+      requestAnimationFrame(animateProjectCards);
+    }
   })();
 </script>

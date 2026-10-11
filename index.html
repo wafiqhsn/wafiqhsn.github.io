@@ -203,7 +203,7 @@
 
     <!-- Active page content -->
 
-    <main id="content" class="min-h-screen transition-opacity duration-300"></main>
+    <main id="content" class="min-h-screen"></main>
 
     <script>
       const content = document.getElementById("content");
@@ -244,68 +244,197 @@
         });
       }
 
-      // Wait for images before showing the page.
+      const tabOrder = ["home.html", "work.html", "about.html"];
+      const desktopScroll = window.matchMedia(
+        "(min-width: 1024px) and (hover: hover) and (pointer: fine)",
+      );
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let currentPage = null;
+      let changingPage = false;
+      let queuedPage = null;
+      let destinationPage = null;
+      let wheelTotal = 0;
+      let lastWheelTime = 0;
+      let wheelBlockedUntil = 0;
+
+      // Avoid hiding a page indefinitely for slow or lazy-loaded images.
       function waitForImages(container) {
-        const imgs = Array.from(container.querySelectorAll("img"));
-
-        const pending = imgs
-          .filter((img) => !img.complete)
-          .map(
-            (img) =>
-              new Promise((resolve) => {
-                img.addEventListener("load", resolve, { once: true });
-                img.addEventListener("error", resolve, { once: true });
-              }),
-          );
-
-        return Promise.all(pending);
+        return Promise.all(
+          Array.from(container.querySelectorAll("img"))
+            .filter((img) => !img.complete && img.loading !== "lazy" && img.getAttribute("src"))
+            .map(
+              (img) =>
+                new Promise((resolve) => {
+                  const finish = () => {
+                    clearTimeout(timeout);
+                    img.removeEventListener("load", finish);
+                    img.removeEventListener("error", finish);
+                    resolve();
+                  };
+                  const timeout = setTimeout(finish, 1500);
+                  img.addEventListener("load", finish, { once: true });
+                  img.addEventListener("error", finish, { once: true });
+                  if (img.complete) finish();
+                }),
+            ),
+        );
       }
 
-      // Fetch and display the selected page.
+      // Let dynamically generated styles and layout settle before revealing a page.
+      function settlePageLayout() {
+        return new Promise((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
+        });
+      }
+
+      // Move content up when advancing and down when returning.
+      async function animatePage(entering, direction) {
+        if (reducedMotion.matches) return;
+        const distance = desktopScroll.matches ? 72 : 28;
+        const hidden = {
+          opacity: 0,
+          transform: `translateY(${(entering ? direction : -direction) * distance}px)`,
+        };
+        const visible = { opacity: 1, transform: "translateY(0)" };
+        const animation = content.animate(entering ? [hidden, visible] : [visible, hidden], {
+          duration: entering ? 480 : 220,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "both",
+        });
+        try {
+          await animation.finished;
+        } finally {
+          if (!entering) content.style.opacity = "0";
+          animation.cancel();
+        }
+      }
+
+      // Serialize navigation and keep the latest click while a page is loading.
       async function loadPage(page) {
-        content.style.opacity = 0;
-
-        const res = await fetch(page);
-
-        const html = await res.text();
-
-        setTimeout(async () => {
+        if (!tabOrder.includes(page)) return;
+        if (changingPage) {
+          queuedPage = page;
+          return;
+        }
+        if (page === currentPage) return;
+        changingPage = true;
+        destinationPage = page;
+        // Count the 800ms wheel delay from the start, not the end.
+        wheelBlockedUntil = performance.now() + 800;
+        content.setAttribute("aria-busy", "true");
+        content.style.pointerEvents = "none";
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const direction =
+          currentPage && tabOrder.indexOf(page) < tabOrder.indexOf(currentPage) ? -1 : 1;
+        try {
+          // Keep the existing page visible if fetching fails.
+          const response = await fetch(page, { signal: controller.signal });
+          if (!response.ok) throw new Error(`Unable to load ${page}: ${response.status}`);
+          const html = await response.text();
+          clearTimeout(timeout);
+          if (currentPage) await animatePage(false, direction);
+          content.style.opacity = "0";
+          content.dispatchEvent(new Event("pageleave"));
           content.innerHTML = html;
-
-          // Start each page at the top.
           window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-
-          // Initialize page content before fading in.
           runScripts(content);
-
-          // Wait for images to prevent a flash behind the glass panel.
+          currentPage = page;
+          const link = Array.from(navLinks).find((item) => item.dataset.page === page);
+          movePill(link);
+          navLinks.forEach((item) => {
+            if (item === link) item.setAttribute("aria-current", "page");
+            else item.removeAttribute("aria-current");
+          });
+          await settlePageLayout();
           await waitForImages(content);
-
-          content.style.opacity = 1;
-        }, 150);
+          await settlePageLayout();
+          content.style.opacity = "1";
+          content.dispatchEvent(new Event("pagereveal"));
+          await animatePage(true, direction);
+        } catch (error) {
+          console.error("Page navigation failed:", error);
+        } finally {
+          clearTimeout(timeout);
+          content.style.opacity = "1";
+          content.removeAttribute("aria-busy");
+          content.style.removeProperty("pointer-events");
+          changingPage = false;
+          wheelTotal = 0;
+          destinationPage = null;
+          const nextPage = queuedPage;
+          queuedPage = null;
+          if (nextPage && nextPage !== currentPage) loadPage(nextPage);
+        }
       }
 
       navLinks.forEach((link) => {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-
-          movePill(link);
-
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
           loadPage(link.dataset.page);
         });
       });
+      window.addEventListener("load", () => loadPage("home.html"));
+      window.navigateTo = loadPage;
 
-      window.addEventListener("load", () => {
-        movePill(navLinks[0]);
+      // Preserve scrolling inside nested panels and form controls.
+      function canScrollInside(target, direction) {
+        if (!(target instanceof Element)) return false;
+        if (target.closest("input, textarea, select, [contenteditable]")) return true;
+        for (let node = target; node && node !== document.body; node = node.parentElement) {
+          if (!/(auto|scroll)/.test(getComputedStyle(node).overflowY)) continue;
+          if (direction > 0 && node.scrollTop + node.clientHeight < node.scrollHeight - 2)
+            return true;
+          if (direction < 0 && node.scrollTop > 2) return true;
+        }
+        return false;
+      }
 
-        loadPage("home.html");
-      });
-
-      window.navigateTo = function (page) {
-        const targetLink = Array.from(navLinks).find((l) => l.dataset.page === page);
-        if (targetLink) movePill(targetLink);
-        loadPage(page);
-      };
+      // Continuous desktop wheel navigation, with an 800ms cooldown at page edges.
+      document.addEventListener(
+        "wheel",
+        (event) => {
+          if (
+            !desktopScroll.matches ||
+            event.ctrlKey ||
+            event.metaKey ||
+            !event.deltaY ||
+            Math.abs(event.deltaX) > Math.abs(event.deltaY)
+          )
+            return;
+          const direction = Math.sign(event.deltaY);
+          if (canScrollInside(event.target, direction)) return;
+          const now = performance.now();
+          const newGesture = now - lastWheelTime > 220;
+          lastWheelTime = now;
+          if (newGesture) {
+            wheelTotal = 0;
+          }
+          const scroller = document.scrollingElement;
+          const atEdge =
+            direction > 0
+              ? scroller.scrollTop + window.innerHeight >= scroller.scrollHeight - 3
+              : scroller.scrollTop <= 3;
+          if (!atEdge && !changingPage) {
+            wheelTotal = 0;
+            return;
+          }
+          const nextIndex = tabOrder.indexOf(destinationPage || currentPage) + direction;
+          if (!currentPage || nextIndex < 0 || nextIndex >= tabOrder.length) return;
+          event.preventDefault();
+          if (now < wheelBlockedUntil) return;
+          const delta =
+            event.deltaY *
+            (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+          if (Math.sign(wheelTotal) !== direction) wheelTotal = 0;
+          wheelTotal += delta;
+          if (Math.abs(wheelTotal) < 60) return;
+          wheelTotal = 0;
+          wheelBlockedUntil = now + 800;
+          loadPage(tabOrder[nextIndex]);
+        },
+        { passive: false },
+      );
 
       // Update the active pill after resizing.
       let resizeTimeout;
@@ -326,62 +455,58 @@
         document.documentElement.classList.toggle("dark");
       });
 
-      // Swipe left or right to switch tabs.
-      const tabOrder = ["home.html", "work.html", "about.html"];
-      let touchStartX = 0;
-      let touchStartY = 0;
-      let touchStartTime = 0;
-      let isSwiping = false;
+      // Vertical touch navigation: swipe up for next, down for previous.
+      // Start at a page edge so long pages keep their normal reading scroll.
+      let touchGesture = null;
+      document.addEventListener("touchstart", (event) => {
+        touchGesture = null;
+        if (event.touches.length !== 1 || !currentPage) return;
+        const touch = event.touches[0];
+        const scroller = document.scrollingElement;
+        touchGesture = {
+          x: touch.clientX,
+          y: touch.clientY,
+          target: event.target,
+          atTop: scroller.scrollTop <= 3,
+          atBottom: scroller.scrollTop + window.innerHeight >= scroller.scrollHeight - 3,
+          direction: 0,
+          distance: 0,
+        };
+      }, { passive: true });
 
-      document.addEventListener(
-        "touchstart",
-        (e) => {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-          touchStartTime = Date.now();
-          isSwiping = false;
-        },
-        { passive: true },
-      );
+      document.addEventListener("touchmove", (event) => {
+        if (!touchGesture) return;
+        if (event.touches.length !== 1) { touchGesture = null; return; }
+        const dx = event.touches[0].clientX - touchGesture.x;
+        const dy = touchGesture.y - event.touches[0].clientY;
+        touchGesture.direction = 0;
+        touchGesture.distance = 0;
+        if (Math.abs(dy) <= Math.abs(dx) || Math.abs(dy) < 10) return;
+        const direction = Math.sign(dy);
+        if (canScrollInside(touchGesture.target, direction)) return;
+        if (direction > 0 ? !touchGesture.atBottom : !touchGesture.atTop) return;
+        const index = tabOrder.indexOf(destinationPage || currentPage) + direction;
+        if (index < 0 || index >= tabOrder.length) return;
+        // Prevent overscroll only when this gesture can navigate to another page.
+        if (event.cancelable) event.preventDefault();
+        touchGesture.direction = direction;
+        touchGesture.distance = Math.abs(dy);
+      }, { passive: false });
 
-      document.addEventListener(
-        "touchmove",
-        (e) => {
-          // Detect horizontal gestures.
-          const dx = e.touches[0].clientX - touchStartX;
-          const dy = e.touches[0].clientY - touchStartY;
-          if (!isSwiping && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
-            isSwiping = true;
-          }
-        },
-        { passive: true },
-      );
+      document.addEventListener("touchend", () => {
+        const gesture = touchGesture;
+        touchGesture = null;
+        if (!gesture || !gesture.direction || gesture.distance < 60) return;
+        const now = performance.now();
+        if (now < wheelBlockedUntil) return;
+        const index = tabOrder.indexOf(destinationPage || currentPage) + gesture.direction;
+        if (index < 0 || index >= tabOrder.length) return;
+        wheelBlockedUntil = now + 800;
+        loadPage(tabOrder[index]);
+      }, { passive: true });
 
-      document.addEventListener(
-        "touchend",
-        (e) => {
-          if (!isSwiping) return;
-
-          const deltaX = e.changedTouches[0].clientX - touchStartX;
-          const deltaTime = Date.now() - touchStartTime;
-
-          // Ignore short or slow accidental swipes.
-          const isSwipe = Math.abs(deltaX) > 60 || (deltaTime < 300 && Math.abs(deltaX) > 30);
-          if (!isSwipe) return;
-
-          const currentIndex = tabOrder.indexOf(activeLink?.dataset.page);
-          if (currentIndex === -1) return;
-
-          if (deltaX < 0 && currentIndex < tabOrder.length - 1) {
-            // Next tab.
-            window.navigateTo(tabOrder[currentIndex + 1]);
-          } else if (deltaX > 0 && currentIndex > 0) {
-            // Previous tab.
-            window.navigateTo(tabOrder[currentIndex - 1]);
-          }
-        },
-        { passive: true },
-      );
+      // Leave pinch zoom and cancelled gestures to the browser.
+      document.addEventListener("touchcancel", () => { touchGesture = null; }, { passive: true });
     </script>
   </body>
 </html>

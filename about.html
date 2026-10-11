@@ -176,11 +176,40 @@
       surface.addEventListener("pointercancel", resetTilt);
     }
 
+    // Slide the photo into the card when About becomes visible.
+    function setupProfileEntrance(about) {
+      const photo = about.querySelector("[data-profile-photo]");
+      if (!photo || photo.dataset.entranceReady) return;
+      photo.dataset.entranceReady = "true";
+      function revealPhoto() {
+        if (!photo.isConnected || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const animation = photo.animate([
+          { opacity: 1, transform: "translate(-50%, 50%)" },
+          { opacity: 1, transform: "translate(-50%, 0)" },
+        ], {
+          duration: 1000,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "both",
+        });
+        animation.finished.then(() => animation.cancel(), () => {});
+      }
+      const container = about.closest("#content");
+      if (container) {
+        container.addEventListener("pagereveal", revealPhoto, { once: true });
+        container.addEventListener("pageleave", () => {
+          container.removeEventListener("pagereveal", revealPhoto);
+        }, { once: true });
+      } else {
+        requestAnimationFrame(revealPhoto);
+      }
+    }
+
     // Render both responsive layouts from the data above.
     function renderAbout() {
       const about = document.getElementById("about");
       if (!about) return;
       setupProfileTilt(about);
+      setupProfileEntrance(about);
 
       about.querySelector("[data-experience]").innerHTML = `
         <h2 class="${styles.heading}">Experience</h2>
@@ -213,6 +242,27 @@
 </script>
 
 <style>
+  /* Equal-width copies keep the title loop seamless. */
+  #about .profile-title-track {
+    display: flex;
+    width: max-content;
+    animation: profile-title-marquee 16s linear infinite;
+  }
+
+  #about .profile-title-copy {
+    flex: none;
+    padding-right: 0.25em;
+  }
+
+  @keyframes profile-title-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #about .profile-title-track { animation: none; }
+  }
+
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
     #about [data-profile-tilt] {
       perspective: 1000px;
@@ -240,33 +290,28 @@
       pointer-events: none;
     }
 
+    /* A wider light band moves forward on hover and reverses on leave. */
     #about [data-profile-shine]::after {
       content: "";
       position: absolute;
       inset: 0;
       background: linear-gradient(
         115deg,
-        transparent 25%,
-        rgb(255 255 255 / 8%) 40%,
-        rgb(255 255 255 / 28%) 50%,
-        rgb(255 255 255 / 8%) 60%,
-        transparent 75%
+        transparent 10%,
+        rgb(255 255 255 / 12%) 30%,
+        rgb(255 255 255 / 28%) 43%,
+        rgb(255 255 255 / 28%) 57%,
+        rgb(255 255 255 / 12%) 70%,
+        transparent 90%
       );
       transform: translateX(-120%);
+      transition: transform 500ms ease-in-out;
     }
 
     #about [data-profile-tilt]:hover [data-profile-shine]::after {
-      animation: about-profile-light-sweep 850ms ease-in-out both;
+      transform: translateX(120%);
     }
 
-    @keyframes about-profile-light-sweep {
-      from {
-        transform: translateX(-120%);
-      }
-      to {
-        transform: translateX(120%);
-      }
-    }
   }
 </style>
 
@@ -275,20 +320,21 @@
     <div class="w-full lg:w-[500px] flex flex-col gap-12 order-1">
       <div>
         <aside data-profile-tilt class="h-fit">
-          <div data-profile-card class="relative w-full h-[200px] lg:h-[300px] rounded-xl">
+          <div data-profile-card class="relative w-full h-[200px] lg:h-[300px] rounded-xl overflow-hidden">
             <div
               aria-hidden="true"
               class="absolute inset-0 bg-[#c7c7d3] dark:bg-[#2A2A2A] rounded-xl pointer-events-none"
             ></div>
-            <div class="absolute inset-x-0 bottom-2 z-0 overflow-hidden flex justify-center">
-              <h2
-                class="text-[72px] lg:text-[96px] font-bold leading-none pb-[0.12em] tracking-tighter text-white whitespace-nowrap"
-              >
-                Creative Designer
-              </h2>
+            <!-- Seamless right-to-left title; duplicates are decorative. -->
+            <div class="absolute inset-x-0 bottom-2 z-0 overflow-hidden">
+              <h2 class="sr-only">Creative Designer</h2>
+              <div class="profile-title-track text-[72px] lg:text-[96px] font-bold leading-none pb-[0.12em] tracking-tighter text-white whitespace-nowrap" aria-hidden="true">
+                <span class="profile-title-copy">Creative Designer&nbsp;</span>
+                <span class="profile-title-copy">Creative Designer&nbsp;</span>
+              </div>
             </div>
             <div data-profile-details class="absolute top-4 left-4 right-4 z-20 text-white">
-              <div class="grid grid-cols-2 gap-y-1">
+              <div class="grid grid-cols-2">
                 <h3 class="text-sm lg:text-xl font-semibold">Wafiq Hasan</h3>
                 <a
                   href="mailto:wafiqhasan10@gmail.com"
