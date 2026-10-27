@@ -814,6 +814,41 @@
           return { card, label, position };
         });
 
+        const animateCards = () => {
+          if (!stack.isConnected || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+          const cards = entries.map(({ card }) => card);
+          for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+          }
+
+          cards.forEach((card, order) => {
+            const animation = card.animate([
+              { opacity: 0, translate: "0 32px" },
+              { opacity: 1, translate: "0 0" },
+            ], {
+              duration: 1000,
+              delay: order * 35,
+              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+              fill: "both",
+            });
+            animation.finished.then(() => animation.cancel(), () => {});
+          });
+        };
+
+        const pageContainer = stack.closest("#content");
+        if (pageContainer) {
+          pageContainer.addEventListener("pagereveal", animateCards, { once: true });
+          pageContainer.addEventListener(
+            "pageleave",
+            () => pageContainer.removeEventListener("pagereveal", animateCards),
+            { once: true },
+          );
+        } else {
+          requestAnimationFrame(animateCards);
+        }
+
         const observer = new ResizeObserver(() => {
           entries.forEach(({ position }) => position());
         });
