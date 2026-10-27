@@ -1,0 +1,678 @@
+<script>
+  (() => {
+    // Update the experience, education, skills, and tools in this data section.
+    const experience = [
+      {
+        period: "Oct 2025 — Present",
+        role: "Graphic Designer",
+        company: "Loan Market",
+        location: "Jakarta, ID",
+        description:
+          "Created visual assets for marketing campaigns and communications. Developed social media content, flyers, invitations, and graphics for web and print. Worked with teams to ensure consistent visual communication.",
+      },
+      {
+        period: "Aug 2025 — Sep 2025",
+        role: "Creative Designer",
+        company: "Observisual",
+        location: "Bandung, ID",
+        description:
+          "Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement. I also collaborated closely with Strategic and Project Managers to deliver high-quality creative outputs on time across multiple campaigns.",
+      },
+      {
+        period: "Aug 2023 — Feb 2024",
+        role: "Motion Graphic Designer",
+        company: "Vidio",
+        location: "Jakarta, ID",
+        description:
+          "As a Motion Graphic Designer, I produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.",
+      },
+      {
+        period: "Mar 2023 — Jun 2023",
+        role: "Creative Designer",
+        company: "Gikslab",
+        location: "Bandung, ID",
+        description:
+          "As a Creative Designer, I created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.",
+      },
+    ];
+
+    const education = [
+      {
+        period: "2021 — 2025",
+        degree: "Bachelor of Communication",
+        institution: "Padjadjaran University",
+        location: "Bandung, ID",
+        detail: "GPA 3.71 / 4.00",
+      },
+    ];
+
+    const skills = ["Graphic Design", "Motion Graphic", "UI/UX Design"];
+    const tools = [
+      "Illustrator",
+      "Photoshop",
+      "After Effects",
+      "Figma",
+      "VS Code",
+      "ChatGPT",
+      "Claude",
+    ];
+
+    // Keep class names for generated content in one place.
+    const styles = {
+      row: "timeline-row",
+      heading: "section-heading",
+      title: "timeline-title",
+      muted: "timeline-muted",
+      badge: "skill-badge",
+    };
+
+    function escapeHtml(value) {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      };
+      return String(value).replace(/[&<>"']/g, (character) => entities[character]);
+    }
+
+    // Shared layout for work and education entries.
+    function createTimelineItem({
+      period,
+      title,
+      organization,
+      location,
+      description = "",
+      detail = "",
+    }) {
+      return `
+        <div class="${styles.row}">
+          <span class="${styles.muted} timeline-period">${escapeHtml(period)}</span>
+          <div>
+            <h3 class="${styles.title}">
+              ${escapeHtml(title)}
+              <span class="timeline-at">at</span>
+              ${escapeHtml(organization)}
+            </h3>
+            <p class="${styles.muted}">${escapeHtml(location)}</p>
+            ${description ? `<p class="timeline-description">${escapeHtml(description)}</p>` : ""}
+            ${detail ? `<p class="timeline-detail">${escapeHtml(detail)}</p>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function createBadge(label) {
+      return `<span class="${styles.badge}">${escapeHtml(label)}</span>`;
+    }
+
+    // Shared badge layout for skills and tools.
+    function createBadgeRow(label, items) {
+      return `
+        <div class="${styles.row}">
+          <span class="${styles.muted}">${escapeHtml(label)}</span>
+          <div class="badge-list">${items.map(createBadge).join("")}</div>
+        </div>
+      `;
+    }
+
+    function createEducationAndSkills() {
+      return `
+        <section>
+          <h2 class="${styles.heading}">Education</h2>
+          <div class="timeline-sections">
+            ${education
+              .map((item) =>
+                createTimelineItem({
+                  ...item,
+                  title: item.degree,
+                  organization: item.institution,
+                }),
+              )
+              .join("")}
+          </div>
+        </section>
+        <section>
+          <h2 class="${styles.heading}">Skill & Tools</h2>
+          <div class="skill-sections">
+            ${createBadgeRow("Skill", skills)}
+            ${createBadgeRow("Tools", tools)}
+          </div>
+        </section>
+      `;
+    }
+
+    // Mouse tilt; disabled for touch and reduced motion.
+    function setupProfileTilt(about) {
+      const surface = about.querySelector("[data-profile-tilt]");
+      if (!surface || surface.dataset.tiltReady) return;
+      surface.dataset.tiltReady = "true";
+      const card = surface.querySelector("[data-profile-card]");
+      const canTilt = window.matchMedia(
+        "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+      );
+
+      function resetTilt() {
+        card.style.removeProperty("--tilt-x");
+        card.style.removeProperty("--tilt-y");
+        card.style.removeProperty("--shadow-x");
+        card.style.removeProperty("--shadow-y");
+        card.removeAttribute("data-tilting");
+      }
+
+      surface.addEventListener("pointermove", (event) => {
+        if (!canTilt.matches || event.pointerType !== "mouse") {
+          resetTilt();
+          return;
+        }
+        // Measure the fixed wrapper to keep tilt stable.
+        const bounds = surface.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        const x = Math.max(
+          -1,
+          Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1),
+        );
+        const y = Math.max(
+          -1,
+          Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1),
+        );
+        card.style.setProperty("--tilt-x", `${-y * 7}deg`);
+        card.style.setProperty("--tilt-y", `${x * 7}deg`);
+        card.style.setProperty("--shadow-x", `${-x * 10}px`);
+        card.style.setProperty("--shadow-y", `${18 - y * 6}px`);
+        card.setAttribute("data-tilting", "");
+      });
+      surface.addEventListener("pointerleave", resetTilt);
+      surface.addEventListener("pointercancel", resetTilt);
+    }
+
+    // Slide the photo into the card when About becomes visible.
+    function setupProfileEntrance(about) {
+      const photo = about.querySelector("[data-profile-photo]");
+      if (!photo || photo.dataset.entranceReady) return;
+      photo.dataset.entranceReady = "true";
+
+      function revealPhoto() {
+        if (
+          !photo.isConnected ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
+          return;
+        }
+
+        const animation = photo.animate(
+          [
+            { opacity: 1, transform: "translate(-50%, 50%)" },
+            { opacity: 1, transform: "translate(-50%, 0)" },
+          ],
+          {
+            duration: 1000,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            fill: "both",
+          },
+        );
+        animation.finished.then(() => animation.cancel(), () => {});
+      }
+
+      const container = about.closest("#content");
+      if (container) {
+        container.addEventListener("pagereveal", revealPhoto, { once: true });
+        container.addEventListener("pageleave", () => {
+          container.removeEventListener("pagereveal", revealPhoto);
+        }, { once: true });
+      } else {
+        requestAnimationFrame(revealPhoto);
+      }
+    }
+
+    // Render both responsive layouts from the data above.
+    function renderAbout() {
+      const about = document.getElementById("about");
+      if (!about) return;
+      setupProfileTilt(about);
+      setupProfileEntrance(about);
+
+      about.querySelector("[data-experience]").innerHTML = `
+        <h2 class="${styles.heading}">Experience</h2>
+        <div class="experience-sections">
+          ${experience
+            .map((item) =>
+              createTimelineItem({
+                ...item,
+                title: item.role,
+                organization: item.company,
+              }),
+            )
+            .join("")}
+        </div>
+      `;
+
+      const educationAndSkills = createEducationAndSkills();
+      about.querySelectorAll("[data-education-skills]").forEach((container) => {
+        container.innerHTML = educationAndSkills;
+      });
+    }
+
+    // Initialize on tab navigation or direct page load.
+    if (document.getElementById("about")) {
+      renderAbout();
+    } else if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", renderAbout, { once: true });
+    }
+  })();
+</script>
+
+<style>
+  /* Page layout */
+  #about {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 6rem 2rem 4rem;
+  }
+
+  #about .about-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  #about .about-profile-column {
+    order: 1;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  #about [data-profile-tilt] { height: fit-content; }
+
+  #about [data-profile-card] {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  #about .profile-background {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: #d1d5db;
+    pointer-events: none;
+  }
+
+  html.dark #about .profile-background { background: #262626; }
+
+  #about .profile-title-wrap {
+    position: absolute;
+    z-index: 0;
+    inset: auto 0 8px;
+    overflow: hidden;
+  }
+
+  #about .profile-title-track {
+    display: flex;
+    width: max-content;
+    padding-bottom: .12em;
+    color: #fff;
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.05em;
+    white-space: nowrap;
+    animation: profile-title-marquee 16s linear infinite;
+  }
+
+  #about .profile-title-copy {
+    flex: none;
+    padding-right: .25em;
+  }
+
+  #about .profile-details {
+    position: absolute;
+    z-index: 20;
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    color: #fff;
+  }
+
+  #about .profile-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #about .profile-details h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  #about .profile-details a,
+  #about .profile-details p {
+    margin: 0;
+    font-size: 12px;
+    opacity: .8;
+  }
+
+  #about .profile-details a { text-align: right; }
+
+  #about .profile-photo {
+    position: absolute;
+    z-index: 10;
+    bottom: 0;
+    left: 50%;
+    height: 190px;
+    transform: translateX(-50%);
+    object-fit: contain;
+  }
+
+  /* Download links */
+  #about .download-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  #about .download-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #000;
+    font-size: 14px;
+    line-height: 1.375;
+    text-align: center;
+    transition: background-color 300ms ease, color 300ms ease;
+  }
+
+  #about .download-link-primary {
+    background: #000;
+    color: #fff;
+  }
+
+  html.dark #about .download-link {
+    background: #262626;
+    color: #fff;
+  }
+
+  /* Timeline and skill content */
+  #about .about-education-desktop { display: none; }
+  #about .about-experience {
+    order: 2;
+    flex: 1;
+    min-width: 0;
+  }
+
+  #about .about-education-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    margin-top: 3rem;
+  }
+
+  #about .section-heading {
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  #about .timeline-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: baseline;
+    gap: 8px 24px;
+  }
+
+  #about .timeline-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  #about .timeline-muted {
+    color: #6b7280;
+    font-size: 14px;
+  }
+
+  #about .timeline-period { font-variant-numeric: tabular-nums; }
+  #about .timeline-at {
+    color: #4b5563;
+    font-weight: 400;
+  }
+
+  #about .timeline-description {
+    margin: 8px 0 0;
+    color: #4b5563;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  #about .timeline-detail {
+    margin: 4px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  #about .skill-badge {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  #about .badge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  #about .timeline-sections,
+  #about .skill-sections,
+  #about .experience-sections {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #about .timeline-sections { gap: 2.5rem; }
+  #about .skill-sections { gap: 1rem; }
+  #about .experience-sections { gap: 2rem; }
+
+  /* Screen-reader-only heading for the animated profile title */
+  #about .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  #about .download-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  html.dark #about .timeline-title,
+  html.dark #about .section-heading { color: #fff; }
+
+  html.dark #about .timeline-muted,
+  html.dark #about .timeline-at,
+  html.dark #about .timeline-description,
+  html.dark #about .timeline-detail { color: #d1d5db; }
+  html.dark #about .skill-badge {
+    background: #262626;
+    color: #d4d4d4;
+  }
+
+  @media (min-width: 640px) {
+    #about { padding-top: 4rem; }
+    #about .timeline-row { grid-template-columns: 160px minmax(0, 1fr); }
+  }
+
+  @media (min-width: 1024px) {
+    #about { padding-top: 6rem; }
+    #about .about-columns {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    #about .about-profile-column {
+      width: 500px;
+      flex: none;
+    }
+    #about [data-profile-card] { height: 300px; }
+    #about .profile-title-track { font-size: 96px; }
+    #about .profile-details h3 { font-size: 20px; }
+    #about .profile-details a,
+    #about .profile-details p {
+      font-size: 18px;
+    }
+    #about .profile-photo { height: 280px; }
+    #about .about-education-desktop {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+    #about .about-education-mobile { display: none; }
+  }
+
+  @keyframes profile-title-marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #about .profile-title-track { animation: none; }
+  }
+
+  /* Pointer-only card effects */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    #about [data-profile-tilt] {
+      perspective: 1000px;
+    }
+
+    #about [data-profile-card] {
+      transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transition:
+        transform 350ms ease-out,
+        box-shadow 350ms ease-out;
+    }
+
+    #about [data-profile-card][data-tilting] {
+      transition-duration: 120ms;
+      box-shadow: var(--shadow-x, 0px) var(--shadow-y, 18px) 32px -12px rgb(0 0 0 / 0%);
+    }
+
+    /* Decorative light sweep; profile links remain interactive. */
+    #about [data-profile-shine] {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      overflow: hidden;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    #about [data-profile-shine]::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 10%,
+        rgb(255 255 255 / 12%) 30%,
+        rgb(255 255 255 / 28%) 43%,
+        rgb(255 255 255 / 28%) 57%,
+        rgb(255 255 255 / 12%) 70%,
+        transparent 90%
+      );
+      transform: translateX(-120%);
+      transition: transform 500ms ease-in-out;
+    }
+
+    #about [data-profile-tilt]:hover [data-profile-shine]::after {
+      transform: translateX(120%);
+    }
+  }
+</style>
+
+<section id="about">
+  <div class="about-columns">
+    <div class="about-profile-column">
+      <div>
+        <aside data-profile-tilt>
+          <div data-profile-card>
+            <div class="profile-background" aria-hidden="true"></div>
+            <div class="profile-title-wrap">
+              <h2 class="sr-only">Creative Designer</h2>
+              <div class="profile-title-track" aria-hidden="true">
+                <span class="profile-title-copy">Creative Designer&nbsp;</span>
+                <span class="profile-title-copy">Creative Designer&nbsp;</span>
+              </div>
+            </div>
+            <div class="profile-details">
+              <div class="profile-details-grid">
+                <h3>Wafiq Hasan</h3>
+                <a href="mailto:wafiqhasan10@gmail.com">Mail</a>
+                <p>Jakarta, ID</p>
+                <a
+                  href="https://wa.me/6285290402449"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Phone
+                </a>
+              </div>
+            </div>
+            <img
+              class="profile-photo"
+              data-profile-photo
+              src="Images/Profile.webp"
+              alt="Profile"
+            />
+            <span data-profile-shine aria-hidden="true"></span>
+          </div>
+        </aside>
+
+        <!-- Download links -->
+        <div class="download-links">
+          <a
+            href="https://drive.google.com/file/d/1ptUa8NC2_C57vPdolugWmaEgKEF1b3-g/view?usp=drive_link"
+            target="_blank"
+            class="download-link"
+          >
+            Download CV
+          </a>
+          <a
+            href="https://drive.google.com/file/d/1llZMCI6Dl_-RVUQu9ySJ4RSdKSjKFMhu/view?usp=drive_link"
+            target="_blank"
+            class="download-link download-link-primary"
+          >
+            Download Portfolio
+          </a>
+        </div>
+      </div>
+
+      <div class="about-education-desktop" data-education-skills></div>
+    </div>
+
+    <section class="about-experience" data-experience></section>
+  </div>
+
+  <div class="about-education-mobile" data-education-skills></div>
+</section>

@@ -1,0 +1,325 @@
+<style>
+  #labs,
+  #labs * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+
+  #labs {
+    max-width: 880px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 112px 32px 96px;
+    color: #17191c;
+  }
+
+  #labs .labs-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #labs .labs-list > li {
+    display: flex;
+    min-width: 0;
+  }
+
+  #labs .labs-repo {
+    display: flex;
+    width: 100%;
+    min-height: 180px;
+    flex-direction: column;
+    padding: 22px;
+    border: 0;
+    border-radius: 16px;
+    background: #f5f6f7;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #labs .labs-repo-top,
+  #labs .labs-repo-heading {
+    display: flex;
+    align-items: center;
+  }
+
+  #labs .labs-repo-top {
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  #labs .labs-repo-heading {
+    min-width: 0;
+    gap: 12px;
+  }
+
+  #labs .labs-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    object-fit: contain;
+  }
+
+  #labs .labs-icon-placeholder {
+    border-radius: 30%;
+    background: #d5d9df;
+  }
+
+  #labs .labs-name {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  #labs .labs-description {
+    margin: 8px 0 0;
+    color: #717780;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  #labs .labs-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 16px;
+    color: #717780;
+    font-size: 12px;
+  }
+
+  #labs .labs-meta > * {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #515761;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  #labs .labs-status {
+    color: #717780;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  #labs .labs-status[hidden],
+  #labs .labs-retry[hidden] {
+    display: none;
+  }
+
+  #labs .labs-retry {
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #17191c;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  #labs a:focus-visible,
+  #labs button:focus-visible {
+    outline: 2px solid #737780;
+    outline-offset: 5px;
+  }
+
+  html.dark #labs { color: #f5f6f7; }
+
+  html.dark #labs .labs-description,
+  html.dark #labs .labs-status,
+  html.dark #labs .labs-meta {
+    color: #a3a3a3;
+  }
+
+  html.dark #labs .labs-repo {
+    background: #1f1f1f;
+  }
+
+  html.dark #labs .labs-icon-placeholder {
+    background: #404040;
+  }
+
+  html.dark #labs .labs-meta > *,
+  html.dark #labs .labs-retry {
+    background: #333;
+    color: #e5e5e5;
+  }
+
+  @media (max-width: 767px) {
+    #labs { padding: 88px 24px 80px; }
+    #labs .labs-name { font-size: 18px; }
+    #labs .labs-list {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+    #labs .labs-repo {
+      min-height: 160px;
+      padding: 20px;
+    }
+  }
+</style>
+
+<!-- GitHub repositories -->
+<section id="labs">
+  <p class="labs-status" role="status">Loading repositories…</p>
+  <ul class="labs-list" aria-label="GitHub repositories" aria-busy="true"></ul>
+  <button class="labs-retry" type="button" hidden>Try again</button>
+</section>
+<script>
+  (() => {
+    const labs = document.getElementById("labs");
+    const list = labs.querySelector(".labs-list");
+    const status = labs.querySelector(".labs-status");
+    const retry = labs.querySelector(".labs-retry");
+    const controller = new AbortController();
+    const githubUser = "wafiqhsn";
+
+    const node = (tag, className, text) => {
+      const element = document.createElement(tag);
+      element.className = className;
+      element.textContent = text;
+      return element;
+    };
+
+    const repoDestination = (repo) => {
+      if (repo.language?.toLowerCase() === "html") {
+        const base = `https://${githubUser}.github.io/`;
+        return repo.name.toLowerCase() === `${githubUser}.github.io`
+          ? base
+          : `${base}${encodeURIComponent(repo.name)}/`;
+      }
+      return `https://github.com/${encodeURIComponent(githubUser)}/${encodeURIComponent(
+        repo.name,
+      )}`;
+    };
+
+    const render = (repos) => {
+      const fragment = document.createDocumentFragment();
+
+      for (const repo of repos) {
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        link.className = "labs-repo";
+        link.href = repoDestination(repo);
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        const top = node("div", "labs-repo-top", "");
+        const heading = node("div", "labs-repo-heading", "");
+        const iconPath = repo.default_branch
+          ? `https://raw.githubusercontent.com/${githubUser}/${encodeURIComponent(
+              repo.name,
+            )}/${encodeURIComponent(repo.default_branch)}/favicon.png`
+          : "";
+        const icon = document.createElement(iconPath ? "img" : "span");
+        icon.className = `labs-icon${iconPath ? "" : " labs-icon-placeholder"}`;
+
+        if (iconPath) {
+          icon.alt = "";
+          icon.width = 24;
+          icon.height = 24;
+          icon.decoding = "async";
+          icon.addEventListener("error", () => {
+            const placeholder = document.createElement("span");
+            placeholder.className = "labs-icon labs-icon-placeholder";
+            icon.replaceWith(placeholder);
+          }, { once: true });
+          icon.src = iconPath;
+        }
+
+        heading.append(icon, node("h2", "labs-name", repo.name));
+        top.append(heading);
+        link.append(top);
+
+        if (repo.description) link.append(node("p", "labs-description", repo.description));
+
+        const meta = node("div", "labs-meta", "");
+        if (repo.language) meta.append(node("span", "", repo.language));
+        if (repo.stargazers_count) meta.append(node("span", "", `★ ${repo.stargazers_count}`));
+        if (repo.fork) meta.append(node("span", "", "Fork"));
+        if (repo.archived) meta.append(node("span", "", "Archived"));
+
+        const updatedAt = repo.pushed_at || repo.updated_at;
+        const updatedDate = updatedAt ? new Date(updatedAt) : null;
+        if (updatedDate && !Number.isNaN(updatedDate.getTime())) {
+          const label = new Intl.DateTimeFormat("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }).format(updatedDate);
+          const date = node("time", "labs-date", `Updated ${label}`);
+          date.dateTime = updatedDate.toISOString();
+          meta.append(date);
+        }
+
+        if (meta.childElementCount) link.append(meta);
+        item.append(link);
+        fragment.append(item);
+      }
+
+      list.replaceChildren(fragment);
+    };
+
+    const loadRepos = async () => {
+      status.hidden = list.childElementCount > 0;
+      status.textContent = "Loading repositories…";
+      retry.hidden = true;
+      list.setAttribute("aria-busy", "true");
+
+      const request = new AbortController();
+      const abortRequest = () => request.abort();
+      controller.signal.addEventListener("abort", abortRequest, { once: true });
+      const timeout = setTimeout(abortRequest, 15000);
+
+      try {
+        const repos = [];
+        for (let page = 1; ; page++) {
+          const url = `https://api.github.com/users/${githubUser}/repos?type=owner&sort=updated&per_page=100&page=${page}`;
+          const response = await fetch(url, { signal: request.signal });
+          if (!response.ok) throw new Error(`GitHub ${response.status}`);
+          const batch = await response.json();
+          if (!Array.isArray(batch)) throw new Error("Invalid repository response");
+          repos.push(...batch);
+          if (batch.length < 100) break;
+        }
+
+        if (controller.signal.aborted) return;
+        render(repos);
+        status.hidden = repos.length > 0;
+        status.textContent = "No public repositories yet.";
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Unable to load GitHub repositories:", error);
+        status.hidden = false;
+        status.textContent = list.childElementCount
+          ? "Couldn’t refresh repositories. Try again shortly."
+          : "Couldn’t load repositories. Try again shortly.";
+        retry.hidden = false;
+      } finally {
+        clearTimeout(timeout);
+        controller.signal.removeEventListener("abort", abortRequest);
+        if (!controller.signal.aborted) list.setAttribute("aria-busy", "false");
+      }
+    };
+
+    retry.addEventListener("click", loadRepos, { signal: controller.signal });
+    document.getElementById("content")?.addEventListener(
+      "pageleave",
+      () => controller.abort(),
+      { once: true },
+    );
+    loadRepos();
+  })();
+</script>

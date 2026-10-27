@@ -1,0 +1,860 @@
+<html>
+  <head>
+    <script>
+      // Local scope keeps repeat visits safe.
+      (() => {
+        const API_KEY = "57700d069f0f6393a652370bf2f79427";
+        let disposed = false;
+        const USERNAME = "wafiqhsn";
+
+        // Load the latest Last.fm album artwork.
+        async function loadAlbumCover() {
+          try {
+            const response = await fetch(
+              `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1`,
+            );
+
+            const data = await response.json();
+            const track = data.recenttracks.track[0];
+
+            const cover =
+              track.image[3]["#text"] || track.image[2]["#text"] || track.image[1]["#text"];
+
+            if (cover && !disposed) {
+              const img = document.getElementById("albumCover");
+              const placeholder = document.getElementById("albumPlaceholder");
+
+              if (!img || !placeholder) return;
+              img.src = cover;
+              img.classList.remove("is-hidden");
+              placeholder.classList.add("is-hidden");
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        loadAlbumCover();
+        // Refresh the artwork every 30 seconds.
+        const albumTimer = setInterval(loadAlbumCover, 30000);
+        // Stop refreshing when the Home tab is replaced.
+        document.getElementById("content")?.addEventListener(
+          "pageleave",
+          () => {
+            disposed = true;
+            clearInterval(albumTimer);
+          },
+          { once: true },
+        );
+      })();
+    </script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      /* Home layout */
+      .home-main {
+        position: relative;
+        display: flex;
+        min-height: 100vh;
+        min-height: 100dvh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        padding: 3.5rem 0;
+        background: #fff;
+        color: #171717;
+        transition: background-color 300ms ease, color 300ms ease;
+      }
+      html.dark .home-main {
+        background: #000;
+        color: #f5f5f5;
+      }
+
+      .home-copyright {
+        position: fixed;
+        z-index: 300;
+        bottom: .75rem;
+        left: 0;
+        width: 100%;
+        color: #737373;
+        font-size: .875rem;
+        text-align: center;
+        pointer-events: none;
+        transition: color 300ms ease;
+      }
+      html.dark .home-copyright { color: #a3a3a3; }
+      .home-hero-wrap,
+      .home-intro-wrap {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .home-hero-wrap {
+        width: 100%;
+        justify-content: center;
+        margin: auto 0;
+      }
+
+      .home-intro-wrap {
+        width: 100%;
+        max-width: 48rem;
+        flex: none;
+        margin: 0 auto .5rem;
+        padding: 0 1.5rem;
+        text-align: center;
+      }
+
+      .home-intro {
+        margin: 0 0 1.25rem;
+        color: #000;
+        font-size: 19px;
+        font-weight: 400;
+        line-height: 2rem;
+        letter-spacing: .02em;
+        transition: color 300ms ease;
+      }
+
+      html.dark .home-intro { color: #d4d4d4; }
+
+      .home-cta-wrap {
+        display: flex;
+        justify-content: center;
+        gap: .25rem;
+      }
+
+      #heroButton {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        padding: .2em .6em;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        background: #000;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 500;
+        line-height: 1.2;
+        transition:
+          background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+          color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+          border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+          transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      html.dark #heroButton {
+        background: #262626;
+        border-color: #404040;
+      }
+      #heroButton:active { transform: scale(.95); }
+
+      .hero-button-content {
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+        white-space: nowrap;
+      }
+
+      .hero-button-emoji {
+        width: 0;
+        margin-left: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 300ms ease, width 300ms ease, margin-left 300ms ease;
+      }
+      #heroButton:hover .hero-button-emoji,
+      #heroButton:focus-visible .hero-button-emoji {
+        width: auto;
+        margin-left: .25rem;
+        opacity: 1;
+      }
+
+      /* Frosted panel below the floating cards */
+      #glassPanel {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -80px;
+        top: var(--glass-line);
+        background-color: rgba(255, 255, 255, 0.5);
+        -webkit-backdrop-filter: blur(25px);
+        backdrop-filter: blur(25px);
+        border-top: 2px solid rgba(255, 255, 255, 0.7);
+        z-index: 50;
+        pointer-events: none;
+        /* Animate glass colors during theme changes. */
+        transition:
+          background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+          border-top-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      html.dark #glassPanel {
+        background-color: rgba(0, 0, 0, 0.4);
+        border-top-color: rgba(255, 255, 255, 0.1);
+      }
+
+      #glassPanel::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-color: #fff;
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          rgb(0 0 0 / 20%) 25%,
+          rgb(0 0 0 / 75%) 65%,
+          #000 95%
+        );
+        mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          rgb(0 0 0 / 20%) 25%,
+          rgb(0 0 0 / 75%) 65%,
+          #000 95%
+        );
+        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      html.dark #glassPanel::after {
+        background-color: #000;
+      }
+
+      .home-viewport {
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-x: clip;
+      }
+
+      /* Floating cards */
+      .home-card-scene {
+        position: relative;
+        display: flex;
+        width: 100%;
+        --glass-line: 171.6px;
+        height: calc(var(--glass-line) + 100px);
+        flex: none;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      #cardStack {
+        position: relative;
+        z-index: 20;
+        display: flex;
+        width: 100%;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        margin: .5rem auto 0;
+        padding: 0 1rem;
+        transform: scale(.45);
+        transform-origin: center;
+        transition: transform 300ms ease;
+      }
+
+      #cardStack > .floating-item + .floating-item { margin-left: -6rem; }
+
+      .floating-item {
+        position: relative;
+        flex: none;
+        cursor: pointer;
+        transition: transform 300ms ease;
+        animation: riseBounce .8s cubic-bezier(.175, .885, .32, 1.275) both;
+      }
+
+      .floating-item:hover { transform: translateY(-2rem); }
+
+      .spotify-card {
+        z-index: 10;
+        display: flex;
+        width: 11rem;
+        height: 11rem;
+        --card-rest-y: 16px;
+        transform: translateY(1rem);
+        border-radius: 999px;
+      }
+
+      .spotify-card:hover { transform: translateY(calc(1rem - 1.5rem)); }
+
+      .spotify-card-face {
+        position: relative;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: .75rem;
+        border-radius: 30px;
+        background: #e5e5e5;
+      }
+      .vinyl-record {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        animation: spin 5s linear infinite;
+      }
+
+      .vinyl-gradient {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 180deg at 50% 50%,
+          #333 0deg,
+          #4d4d4d 39deg,
+          #666 79deg,
+          #808080 118deg,
+          #8c8c8c 138deg,
+          #737373 201deg,
+          #333 261deg,
+          #8c8c8c 317deg,
+          #333 360deg
+        );
+      }
+      .vinyl-ring,
+      .vinyl-label,
+      .vinyl-hole,
+      .vinyl-center,
+      .album-placeholder,
+      .album-cover {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        border-radius: 50%;
+      }
+      .vinyl-ring {
+        width: 84%;
+        height: 84%;
+        border: 1px solid #000;
+        opacity: .2;
+      }
+
+      .vinyl-ring-inner {
+        width: 68%;
+        height: 68%;
+      }
+      .vinyl-label {
+        width: 50%;
+        height: 50%;
+        background: #171717;
+      }
+      .vinyl-center {
+        width: 3%;
+        height: 3%;
+        background: #171717;
+      }
+      .vinyl-hole {
+        width: 30%;
+        height: 30%;
+        border-radius: 50%;
+        background: #22c55e;
+      }
+
+      .album-placeholder,
+      .album-cover {
+        width: 68%;
+        height: 68%;
+      }
+
+      .album-cover { object-fit: cover; }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .is-hidden { display: none !important; }
+      .resume-card {
+        z-index: 20;
+        width: 340px;
+        height: 288px;
+      }
+      .resume-note {
+        position: absolute;
+        z-index: 20;
+        top: 28px;
+        left: 36px;
+        width: 304px;
+        height: 264px;
+        overflow: hidden;
+        background: #ebe4d4;
+      }
+      .resume-note-copy {
+        padding: 1.25rem;
+        color: #000;
+        font-size: 1.25rem;
+        line-height: 1.5;
+        text-align: left;
+      }
+      .resume-photo-frame {
+        position: absolute;
+        z-index: 20;
+        top: 36px;
+        left: 28px;
+        padding: 8px 8px 20px;
+        background: #efefef;
+        box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+      }
+      .resume-photo-crop {
+        width: 104px;
+        height: 124px;
+        overflow: hidden;
+        background: #bcc2c8;
+      }
+      .resume-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+        transform: translateY(25px) scale(1.2);
+      }
+      .resume-clip {
+        position: absolute;
+        z-index: 30;
+        top: 7px;
+        left: 48px;
+      }
+      .work-card {
+        z-index: 40;
+        width: 18rem;
+        height: 18rem;
+      }
+      .work-folder-tab {
+        position: absolute;
+        top: 8%;
+        left: 0;
+        width: 100%;
+        height: auto;
+      }
+      .work-folder-projects {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .work-folder-project {
+        position: absolute;
+        width: 50%;
+        height: 40%;
+        object-fit: cover;
+        transition: transform 500ms ease-out;
+      }
+      .work-folder-project-one {
+        top: 25%;
+        right: 8%;
+        z-index: 1;
+      }
+      .work-folder-project-two {
+        top: 15%;
+        left: 23%;
+        z-index: 2;
+      }
+      .work-folder-project-three {
+        top: 25%;
+        left: 8%;
+        z-index: 3;
+      }
+      .work-card:hover .work-folder-project-one,
+      .work-card:hover .work-folder-project-three { transform: translateY(-2rem); }
+      .work-card:hover .work-folder-project-two { transform: translateY(-2.5rem); }
+      .work-folder-front {
+        position: absolute;
+        z-index: 20;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 52%;
+        border: 2px solid rgb(255 255 255 / 20%);
+        border-radius: 1rem;
+        background: linear-gradient(to bottom, #b6d0e2, #91b8d4);
+      }
+      .instagram-card {
+        z-index: 30;
+        width: fit-content;
+        height: 15rem;
+        --card-rest-y: 48px;
+        transform: translateY(3rem);
+      }
+
+      .instagram-card:hover { transform: translateY(1rem); }
+      .instagram-photo {
+        position: absolute;
+        z-index: 40;
+        top: 50%;
+        left: 50%;
+        width: 77%;
+        height: 80%;
+        transform: translate(-50%, -50%);
+        border-radius: .5rem;
+        object-fit: cover;
+      }
+      .instagram-frame {
+        position: relative;
+        z-index: 30;
+        width: auto;
+        height: 100%;
+      }
+
+      /* Floating-card labels */
+      @media (min-width: 640px) {
+        .home-card-scene { --glass-line: 180.4px; }
+      }
+
+      @media (min-width: 768px) {
+        .home-card-scene { --glass-line: 240.8px; }
+      }
+
+      @media (min-width: 1024px) {
+        .home-card-scene { --glass-line: 257.6px; }
+      }
+
+      .home-card-scene #cardStack > .card-label {
+        position: absolute;
+        z-index: 70;
+        width: max-content;
+        margin: 0;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        color: #000;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.2;
+        text-align: center;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 500ms ease, visibility 0s 0s;
+      }
+
+      .home-card-scene .card-label::after {
+        content: "";
+        position: absolute;
+        top: calc(100% - 1px);
+        left: 50%;
+        border: 8px solid transparent;
+        border-bottom: 0;
+        border-top-color: #e5e7eb;
+        transform: translateX(-50%);
+      }
+
+      .home-card-scene #cardStack > .card-label.is-visible {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 500ms ease 300ms, visibility 0s 0s;
+      }
+
+      .home-card-scene .floating-item:focus-visible {
+        outline: 3px solid #1f97d4;
+        outline-offset: 6px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .home-card-scene .floating-item,
+        .home-card-scene #cardStack > .card-label,
+        .home-card-scene #cardStack > .card-label.is-visible {
+          transition: none;
+        }
+        .home-card-scene .vinyl-record { animation: none; }
+      }
+
+      @keyframes riseBounce {
+        0% {
+          opacity: 0;
+          translate: 0 80px;
+        }
+
+        70% {
+          opacity: 1;
+          translate: 0 -12px;
+        }
+
+        100% {
+          opacity: 1;
+          translate: 0 0;
+        }
+      }
+
+      #cardStack > .floating-item:nth-child(1) { animation-delay: 0s; }
+      #cardStack > .floating-item:nth-child(2) { animation-delay: 0.1s; }
+      #cardStack > .floating-item:nth-child(3) { animation-delay: 0.2s; }
+      #cardStack > .floating-item:nth-child(4) { animation-delay: 0.3s; }
+
+      /* Responsive layout */
+      @media (min-width: 640px) {
+        .home-main { padding: 4rem 0; }
+        .home-intro-wrap {
+          margin-bottom: 1.5rem;
+          padding: 0 2.5rem;
+        }
+        .home-intro {
+          font-size: 34px;
+          line-height: 3rem;
+        }
+        #heroButton { font-size: 28px; }
+        #cardStack {
+          margin-top: 1.5rem;
+          transform: scale(.75);
+        }
+        #cardStack > .floating-item + .floating-item { margin-left: -3rem; }
+        .home-card-scene { --glass-line: 180.4px; }
+      }
+
+      @media (min-width: 768px) {
+        .home-intro-wrap { margin-bottom: 2.5rem; }
+        #cardStack {
+          margin-top: 2.5rem;
+          transform: scale(.9);
+        }
+        .home-card-scene { --glass-line: 240.8px; }
+      }
+
+      @media (min-width: 1024px) {
+        #cardStack { transform: scale(1); }
+        .home-card-scene { --glass-line: 257.6px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="home-copyright">
+      ©2026 Wafiq Hasan
+    </div>
+
+    <main class="home-viewport home-main">
+      <div class="home-hero-wrap">
+        <div class="home-intro-wrap">
+          <h1 class="home-intro">
+            Hi! I'm Wafiq 👋🏻 a multidisciplinary designer ✏️ based in Jakarta. 🌲 I believe in form follows function and fun. 🖥️
+          </h1>
+
+          <div class="home-cta-wrap">
+            <a id="heroButton" href="mailto:wafiqhasan10@gmail.com">
+              <span class="hero-button-content">
+                <span>Let's Collaborate!</span>
+                <span class="hero-button-emoji" aria-hidden="true">📩</span>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <div class="home-card-scene">
+          <div id="glassPanel"></div>
+
+          <!-- Interactive portfolio cards -->
+          <div id="cardStack">
+            <a
+              aria-label="SPOTIFY"
+              href="https://open.spotify.com/user/exo6k0vh52vbopuqnrtx3j3jp?si=13e14f5090d74d0c"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="floating-item spotify-card"
+            >
+              <span class="card-label" aria-hidden="true">SPOTIFY</span>
+              <div class="spotify-card-face">
+                <div class="vinyl-record">
+                  <div class="vinyl-gradient"></div>
+                  <div class="vinyl-ring"></div>
+                  <div class="vinyl-ring vinyl-ring-inner"></div>
+                  <div class="vinyl-label"></div>
+                  <div class="vinyl-hole"></div>
+                  <div class="vinyl-center"></div>
+                  <div id="albumPlaceholder" class="album-placeholder"></div>
+                  <img
+                    id="albumCover"
+                    class="album-cover is-hidden"
+                    alt="Latest played album cover"
+                  />
+                </div>
+              </div>
+            </a>
+
+            <a
+              aria-label="RESUME"
+              href="about.html"
+              data-page="about.html"
+              class="floating-item resume-card"
+            >
+              <span class="card-label" aria-hidden="true">RESUME</span>
+              <div class="resume-note">
+                <div class="resume-note-copy">
+                  i think there's something beautiful about not having everything figured out yet,
+                  even when it feels confusing sometimes 🌱 still figuring things out
+                </div>
+              </div>
+
+              <div class="resume-photo-frame">
+                <div class="resume-photo-crop">
+                  <img
+                    src="Images/Profile.webp"
+                    alt="Photo"
+                    class="resume-photo"
+                  />
+                </div>
+              </div>
+
+              <div class="resume-clip">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="76"
+                  fill="none"
+                  viewBox="0 0 20 74"
+                >
+                  <path
+                    stroke="url(#a)"
+                    stroke-width="2"
+                    d="M1 37v27a9 9 0 1 0 18 0V10a9 9 0 1 0-18 0v9"
+                  />
+                  <defs>
+                    <linearGradient
+                      id="a"
+                      x1="9.6"
+                      x2="9.6"
+                      y1=".6"
+                      y2="72.6"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#eee" />
+                      <stop offset="1" stop-color="#666" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </a>
+
+            <a
+              aria-label="WORK"
+              href="work.html"
+              data-page="work.html"
+              class="floating-item work-card"
+            >
+              <span class="card-label" aria-hidden="true">WORK</span>
+              <svg
+                class="work-folder-tab"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 295 240"
+              >
+                <path
+                  fill="#91B8D4"
+                  d="M275 239H19a19 19 0 0 1-19-18V19A19 19 0 0 1 19 0h113a19 19 0 0 1 14 6l22 25a19 19 0 0 0 14 6h93a19 19 0 0 1 19 19v165a19 19 0 0 1-19 18"
+                />
+              </svg>
+              <div class="work-folder-projects">
+                <img
+                  class="work-folder-project work-folder-project-one"
+                  src="Projects/Kirimaja.webp"
+                  alt="Kirimaja"
+                />
+                <img
+                  class="work-folder-project work-folder-project-two"
+                  src="Projects/LM.webp"
+                  alt="Loan Market"
+                />
+                <img
+                  class="work-folder-project work-folder-project-three"
+                  src="Projects/Vidio.webp"
+                  alt="Vidio"
+                />
+              </div>
+              <div class="work-folder-front"></div>
+            </a>
+
+            <a
+              aria-label="INSTAGRAM"
+              href="https://instagram.com/wafiqhsn"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="floating-item instagram-card"
+            >
+              <span class="card-label" aria-hidden="true">INSTAGRAM</span>
+              <img src="Images/Photo.webp" alt="Photo" class="instagram-photo" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 203.5 277.8"
+                class="instagram-frame"
+              >
+                <path
+                  d="M196 264q0-8 8-8v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16V78a8 8 0 0 1 0-16V51a8 8 0 0 1 0-17V23a8 8 0 0 1 0-16V0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-16 0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-17 0H82a8 8 0 0 1-16 0H55a8 8 0 0 1-17 0H27q-1 8-8 8-10 0-9-8H0v7a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v6h10a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11v-6q-8-1-8-8"
+                  fill="#D9DCDF"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const stack = document.getElementById("cardStack");
+        if (!stack) return;
+
+        const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const entries = [...stack.querySelectorAll(".floating-item")].map((card) => {
+          const label = card.querySelector(".card-label");
+          stack.append(label);
+
+          if (card.dataset.page) {
+            card.addEventListener("click", (event) => {
+              if (typeof window.navigateTo !== "function") return;
+              event.preventDefault();
+              window.navigateTo(card.dataset.page);
+            });
+          }
+
+          const position = () => {
+            const lift = card.classList.contains("spotify-card")
+              ? 1.5 * rootFontSize
+              : 2 * rootFontSize;
+            const offset = card.classList.contains("resume-card") ? 24 : 0;
+            const restY = parseFloat(
+              getComputedStyle(card).getPropertyValue("--card-rest-y"),
+            ) || 0;
+
+            // Keep the label aligned with the card's resting position, not its hover position.
+            label.style.left = `${card.offsetLeft + (card.offsetWidth - label.offsetWidth) / 2}px`;
+            label.style.top = `${card.offsetTop + restY - lift - 16 + offset - label.offsetHeight}px`;
+          };
+
+          const update = () => {
+            position();
+            label.classList.toggle("is-visible", card.matches(":hover, :focus-visible"));
+          };
+          card.addEventListener("pointerenter", update);
+          card.addEventListener("pointerleave", update);
+          card.addEventListener("focus", update);
+          card.addEventListener("blur", update);
+          return { card, label, position };
+        });
+
+        const observer = new ResizeObserver(() => {
+          entries.forEach(({ position }) => position());
+        });
+        observer.observe(stack);
+
+        entries.forEach(({ card, label, position }) => {
+          observer.observe(card);
+          observer.observe(label);
+          position();
+        });
+
+        document.getElementById("content")?.addEventListener(
+          "pageleave",
+          () => observer.disconnect(),
+          { once: true },
+        );
+      })();
+    </script>
+  </body>
+</html>
