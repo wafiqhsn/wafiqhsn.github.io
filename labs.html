@@ -173,7 +173,7 @@
 
 <!-- GitHub repositories -->
 <section id="labs">
-  <p class="labs-status" role="status">Loading repositories…</p>
+  <p class="labs-status" role="status">Loading selected repositories…</p>
   <ul class="labs-list" aria-label="GitHub repositories" aria-busy="true"></ul>
   <button class="labs-retry" type="button" hidden>Try again</button>
 </section>
@@ -185,6 +185,7 @@
     const retry = labs.querySelector(".labs-retry");
     const controller = new AbortController();
     const githubUser = "wafiqhsn";
+    const repoNames = ["Spectrum", "Beadstudio", "pikofolio4", "pikofolio2"];
 
     const node = (tag, className, text) => {
       const element = document.createElement(tag);
@@ -274,7 +275,7 @@
 
     const loadRepos = async () => {
       status.hidden = list.childElementCount > 0;
-      status.textContent = "Loading repositories…";
+      status.textContent = "Loading selected repositories…";
       retry.hidden = true;
       list.setAttribute("aria-busy", "true");
 
@@ -284,21 +285,23 @@
       const timeout = setTimeout(abortRequest, 15000);
 
       try {
-        const repos = [];
-        for (let page = 1; ; page++) {
-          const url = `https://api.github.com/users/${githubUser}/repos?type=owner&sort=updated&per_page=100&page=${page}`;
+        const repos = await Promise.all(repoNames.map(async (repoName) => {
+          const url = `https://api.github.com/repos/${encodeURIComponent(
+            githubUser,
+          )}/${encodeURIComponent(repoName)}`;
           const response = await fetch(url, { signal: request.signal });
           if (!response.ok) throw new Error(`GitHub ${response.status}`);
-          const batch = await response.json();
-          if (!Array.isArray(batch)) throw new Error("Invalid repository response");
-          repos.push(...batch);
-          if (batch.length < 100) break;
-        }
+          const repo = await response.json();
+          if (!repo || typeof repo !== "object" || typeof repo.name !== "string") {
+            throw new Error("Invalid repository response");
+          }
+          return repo;
+        }));
 
         if (controller.signal.aborted) return;
         render(repos);
         status.hidden = repos.length > 0;
-        status.textContent = "No public repositories yet.";
+        status.textContent = "No repositories configured yet.";
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Unable to load GitHub repositories:", error);
