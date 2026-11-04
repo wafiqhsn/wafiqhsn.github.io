@@ -6,6 +6,38 @@
         const API_KEY = "57700d069f0f6393a652370bf2f79427";
         let disposed = false;
         const USERNAME = "wafiqhsn";
+        const MARQUEE_SPEED = 24;
+
+        const updateTrackMarquees = () => {
+          document.querySelectorAll(".spotify-track-line").forEach((line) => {
+            const marquee = line.firstElementChild;
+            if (!marquee) return;
+
+            marquee.classList.remove("is-scrolling");
+            marquee.style.removeProperty("--marquee-distance");
+            marquee.style.removeProperty("--marquee-travel-duration");
+          });
+
+          requestAnimationFrame(() => {
+            if (disposed) return;
+
+            document.querySelectorAll(".spotify-track-line").forEach((line) => {
+              const marquee = line.firstElementChild;
+              if (!marquee || !line.isConnected) return;
+
+              const distance = marquee.scrollWidth - line.clientWidth;
+              if (distance > 0) {
+                marquee.style.setProperty("--marquee-distance", `${distance}px`);
+                marquee.style.setProperty(
+                  "--marquee-travel-duration",
+                  `${distance / MARQUEE_SPEED}s`,
+                );
+                marquee.classList.add("is-scrolling");
+              }
+            });
+            window.dispatchEvent(new Event("spotifytrackchange"));
+          });
+        };
 
         // Load the latest Last.fm album artwork.
         async function loadAlbumCover() {
@@ -16,6 +48,24 @@
 
             const data = await response.json();
             const track = data.recenttracks.track[0];
+            const artistName =
+              typeof track.artist === "string" ? track.artist : track.artist?.["#text"];
+            const titleLabel = document.getElementById("spotifyTrackTitle");
+            const artistLabel = document.getElementById("spotifyTrackArtist");
+
+            if (
+              !disposed &&
+              titleLabel &&
+              artistLabel &&
+              typeof track.name === "string" &&
+              track.name.trim() &&
+              typeof artistName === "string" &&
+              artistName.trim()
+            ) {
+              titleLabel.textContent = track.name.trim();
+              artistLabel.textContent = artistName.trim();
+              updateTrackMarquees();
+            }
 
             const cover =
               track.image[3]["#text"] || track.image[2]["#text"] || track.image[1]["#text"];
@@ -35,6 +85,7 @@
         }
 
         loadAlbumCover();
+        window.addEventListener("resize", updateTrackMarquees);
         // Refresh the artwork every 30 seconds.
         const albumTimer = setInterval(loadAlbumCover, 30000);
         // Stop refreshing when the Home tab is replaced.
@@ -43,6 +94,7 @@
           () => {
             disposed = true;
             clearInterval(albumTimer);
+            window.removeEventListener("resize", updateTrackMarquees);
           },
           { once: true },
         );
@@ -267,7 +319,11 @@
         transition: transform 300ms ease;
       }
 
-      .floating-item:hover { transform: translateY(-2rem); }
+      @media (hover: hover) {
+        .floating-item:hover { transform: translateY(-2rem); }
+      }
+
+      .floating-item.is-active { transform: translateY(-2rem); }
 
       .spotify-card {
         z-index: 10;
@@ -279,11 +335,16 @@
         border-radius: 999px;
       }
 
-      .spotify-card:hover { transform: translateY(calc(1rem - 1.5rem)); }
+      @media (hover: hover) {
+        .spotify-card:hover { transform: translateY(calc(1rem - 1.5rem)); }
+      }
+
+      .spotify-card.is-active { transform: translateY(calc(1rem - 1.5rem)); }
 
       .spotify-card-face {
         position: relative;
         display: flex;
+        box-sizing: border-box;
         width: 100%;
         height: 100%;
         align-items: center;
@@ -295,8 +356,9 @@
       }
       .vinyl-record {
         position: relative;
+        flex: none;
         width: 100%;
-        height: 100%;
+        aspect-ratio: 1;
         border-radius: 50%;
         animation: spin 5s linear infinite;
       }
@@ -462,9 +524,14 @@
         left: 8%;
         z-index: 3;
       }
-      .work-card:hover .work-folder-project-one,
-      .work-card:hover .work-folder-project-three { transform: translateY(-2rem); }
-      .work-card:hover .work-folder-project-two { transform: translateY(-2.5rem); }
+      @media (hover: hover) {
+        .work-card:hover .work-folder-project-one,
+        .work-card:hover .work-folder-project-three { transform: translateY(-2rem); }
+        .work-card:hover .work-folder-project-two { transform: translateY(-2.5rem); }
+      }
+      .work-card.is-active .work-folder-project-one,
+      .work-card.is-active .work-folder-project-three { transform: translateY(-2rem); }
+      .work-card.is-active .work-folder-project-two { transform: translateY(-2.5rem); }
       .work-folder-front {
         position: absolute;
         z-index: 20;
@@ -484,7 +551,10 @@
         transform: translateY(3rem);
       }
 
-      .instagram-card:hover { transform: translateY(1rem); }
+      @media (hover: hover) {
+        .instagram-card:hover { transform: translateY(1rem); }
+      }
+      .instagram-card.is-active { transform: translateY(1rem); }
       .instagram-photo {
         position: absolute;
         z-index: 40;
@@ -534,6 +604,32 @@
         visibility: hidden;
         pointer-events: none;
         transition: opacity 500ms ease, visibility 0s 0s;
+      }
+
+      .home-card-scene #cardStack > .spotify-track-label {
+        display: grid;
+        width: max-content;
+        max-width: min(10rem, calc(100vw - 2rem));
+        box-sizing: border-box;
+        gap: 0;
+        line-height: normal;
+        border-radius: 10px;
+        text-transform: uppercase;
+      }
+
+      .spotify-track-line {
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .spotify-track-marquee {
+        display: inline-block;
+      }
+
+      .spotify-track-artist {
+        color: #525252;
+        font-size: 11px;
       }
 
       .home-card-scene .card-label::after {
@@ -637,7 +733,16 @@
               rel="noopener noreferrer"
               class="floating-item spotify-card"
             >
-              <span class="card-label" aria-hidden="true">SPOTIFY</span>
+              <span class="card-label spotify-track-label" aria-hidden="true">
+                <span class="spotify-track-line">
+                  <span id="spotifyTrackTitle" class="spotify-track-marquee">
+                    SPOTIFY
+                  </span>
+                </span>
+                <span class="spotify-track-line">
+                  <span id="spotifyTrackArtist" class="spotify-track-marquee spotify-track-artist"></span>
+                </span>
+              </span>
               <div class="spotify-card-face">
                 <div class="vinyl-record">
                   <div class="vinyl-gradient"></div>
@@ -777,17 +882,49 @@
         if (!stack) return;
 
         const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const stopTrackMarquees = (label) => {
+          label.querySelectorAll(".spotify-track-marquee").forEach((marquee) => {
+            marquee.getAnimations().forEach((animation) => animation.cancel());
+          });
+        };
+        const updateTrackMarqueeAnimations = (label, isVisible) => {
+          stopTrackMarquees(label);
+          if (!isVisible || reducedMotionQuery.matches) return;
+
+          label.querySelectorAll(".spotify-track-marquee.is-scrolling").forEach((marquee) => {
+            const distance = parseFloat(marquee.style.getPropertyValue("--marquee-distance"));
+            const travelDuration =
+              parseFloat(marquee.style.getPropertyValue("--marquee-travel-duration")) * 1000;
+            if (!distance || !travelDuration) return;
+
+            const pauseDuration = 1000;
+            const totalDuration = travelDuration * 2 + pauseDuration * 3;
+            const startSlide = pauseDuration / totalDuration;
+            const reachEnd = (pauseDuration + travelDuration) / totalDuration;
+            const returnStart = (pauseDuration * 2 + travelDuration) / totalDuration;
+            const reachStart = (pauseDuration * 2 + travelDuration * 2) / totalDuration;
+            const atEnd = `translateX(-${distance}px)`;
+
+            marquee.animate(
+              [
+                { transform: "translateX(0)", offset: 0 },
+                { transform: "translateX(0)", offset: startSlide },
+                { transform: atEnd, offset: reachEnd },
+                { transform: atEnd, offset: returnStart },
+                { transform: "translateX(0)", offset: reachStart },
+                { transform: "translateX(0)", offset: 1 },
+              ],
+              { duration: totalDuration, iterations: Infinity, easing: "linear" },
+            );
+          });
+        };
+        const hoverQuery = window.matchMedia("(hover: hover)");
+        const touchQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
+        let activeCard = null;
         const entries = [...stack.querySelectorAll(".floating-item")].map((card) => {
           const label = card.querySelector(".card-label");
           stack.append(label);
-
-          if (card.dataset.page) {
-            card.addEventListener("click", (event) => {
-              if (typeof window.navigateTo !== "function") return;
-              event.preventDefault();
-              window.navigateTo(card.dataset.page);
-            });
-          }
 
           const position = () => {
             const lift = card.classList.contains("spotify-card")
@@ -805,14 +942,76 @@
 
           const update = () => {
             position();
-            label.classList.toggle("is-visible", card.matches(":hover, :focus-visible"));
+            const isVisible =
+              card.classList.contains("is-active") ||
+              card.matches(":focus-visible") ||
+              (hoverQuery.matches && card.matches(":hover"));
+            label.classList.toggle("is-visible", isVisible);
+            if (card.classList.contains("spotify-card")) {
+              updateTrackMarqueeAnimations(label, isVisible);
+            }
           };
+
+          card.addEventListener("click", (event) => {
+            const isTouchTap = touchQuery.matches && event.detail !== 0;
+            if (isTouchTap && !card.classList.contains("is-active")) {
+              event.preventDefault();
+              if (activeCard) {
+                activeCard.classList.remove("is-active");
+                const activeEntry = entries.find(({ card: entryCard }) => entryCard === activeCard);
+                activeEntry?.label.classList.remove("is-visible");
+                if (activeCard.classList.contains("spotify-card") && activeEntry) {
+                  updateTrackMarqueeAnimations(activeEntry.label, false);
+                }
+              }
+              activeCard = card;
+              card.classList.add("is-active");
+              update();
+              return;
+            }
+
+            if (card.classList.contains("is-active")) {
+              card.classList.remove("is-active");
+              activeCard = null;
+              update();
+            }
+
+            if (card.dataset.page && typeof window.navigateTo === "function") {
+              event.preventDefault();
+              window.navigateTo(card.dataset.page);
+            }
+          });
+
           card.addEventListener("pointerenter", update);
           card.addEventListener("pointerleave", update);
           card.addEventListener("focus", update);
           card.addEventListener("blur", update);
           return { card, label, position };
         });
+
+        const refreshVisibleTrackMarquees = () => {
+          entries.forEach(({ card, label }) => {
+            if (card.classList.contains("spotify-card")) {
+              updateTrackMarqueeAnimations(
+                label,
+                card.classList.contains("is-active") ||
+                  card.matches(":focus-visible") ||
+                  (hoverQuery.matches && card.matches(":hover")),
+              );
+            }
+          });
+        };
+        window.addEventListener("spotifytrackchange", refreshVisibleTrackMarquees);
+        const handleReducedMotionChange = () => {
+          if (reducedMotionQuery.matches) {
+            entries.forEach(({ card, label }) => {
+              if (card.classList.contains("spotify-card")) stopTrackMarquees(label);
+            });
+          } else {
+            refreshVisibleTrackMarquees();
+          }
+        };
+        reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
         const animateCards = () => {
           if (!stack.isConnected || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -862,7 +1061,14 @@
 
         document.getElementById("content")?.addEventListener(
           "pageleave",
-          () => observer.disconnect(),
+          () => {
+            observer.disconnect();
+            window.removeEventListener("spotifytrackchange", refreshVisibleTrackMarquees);
+            reducedMotionQuery.removeEventListener("change", handleReducedMotionChange);
+            entries.forEach(({ card, label }) => {
+              if (card.classList.contains("spotify-card")) stopTrackMarquees(label);
+            });
+          },
           { once: true },
         );
       })();
