@@ -1,130 +1,23 @@
 <html>
   <head>
-    <script>
-      // Local scope keeps repeat visits safe.
-      (() => {
-        const API_KEY = "57700d069f0f6393a652370bf2f79427";
-        let disposed = false;
-        const USERNAME = "wafiqhsn";
-        const MARQUEE_SPEED = 24;
-
-        const updateTrackMarquees = () => {
-          document.querySelectorAll(".spotify-track-line").forEach((line) => {
-            const marquee = line.firstElementChild;
-            if (!marquee) return;
-
-            marquee.classList.remove("is-scrolling");
-            marquee.style.removeProperty("--marquee-distance");
-            marquee.style.removeProperty("--marquee-travel-duration");
-          });
-
-          requestAnimationFrame(() => {
-            if (disposed) return;
-
-            document.querySelectorAll(".spotify-track-line").forEach((line) => {
-              const marquee = line.firstElementChild;
-              if (!marquee || !line.isConnected) return;
-
-              const distance = marquee.scrollWidth - line.clientWidth;
-              if (distance > 0) {
-                marquee.style.setProperty("--marquee-distance", `${distance}px`);
-                marquee.style.setProperty(
-                  "--marquee-travel-duration",
-                  `${distance / MARQUEE_SPEED}s`,
-                );
-                marquee.classList.add("is-scrolling");
-              }
-            });
-            window.dispatchEvent(new Event("spotifytrackchange"));
-          });
-        };
-
-        // Load the latest Last.fm album artwork.
-        async function loadAlbumCover() {
-          try {
-            const response = await fetch(
-              `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1`,
-            );
-
-            const data = await response.json();
-            const track = data.recenttracks.track[0];
-            const artistName =
-              typeof track.artist === "string" ? track.artist : track.artist?.["#text"];
-            const titleLabel = document.getElementById("spotifyTrackTitle");
-            const artistLabel = document.getElementById("spotifyTrackArtist");
-
-            if (
-              !disposed &&
-              titleLabel &&
-              artistLabel &&
-              typeof track.name === "string" &&
-              track.name.trim() &&
-              typeof artistName === "string" &&
-              artistName.trim()
-            ) {
-              titleLabel.textContent = track.name.trim();
-              artistLabel.textContent = artistName.trim();
-              updateTrackMarquees();
-            }
-
-            const cover =
-              track.image[3]["#text"] || track.image[2]["#text"] || track.image[1]["#text"];
-
-            if (cover && !disposed) {
-              const img = document.getElementById("albumCover");
-              const placeholder = document.getElementById("albumPlaceholder");
-
-              if (!img || !placeholder) return;
-              img.src = cover;
-              img.classList.remove("is-hidden");
-              placeholder.classList.add("is-hidden");
-            }
-          } catch (error) {
-            console.error(error);
-          }
-        }
-
-        loadAlbumCover();
-        window.addEventListener("resize", updateTrackMarquees);
-        // Refresh the artwork every 30 seconds.
-        const albumTimer = setInterval(loadAlbumCover, 30000);
-        // Stop refreshing when the Home tab is replaced.
-        document.getElementById("content")?.addEventListener(
-          "pageleave",
-          () => {
-            disposed = true;
-            clearInterval(albumTimer);
-            window.removeEventListener("resize", updateTrackMarquees);
-          },
-          { once: true },
-        );
-      })();
-    </script>
-
     <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
+      body { font-family: Arial, sans-serif; }
 
-      /* Home layout */
+      /* ───────── Layout ───────── */
       .home-main {
         position: relative;
         display: flex;
-        min-height: 100vh;
         min-height: 100dvh;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        overflow-x: hidden;
+        overflow-x: clip;
         padding: 3.5rem 0;
         background: #fff;
         color: #171717;
         transition: background-color 300ms ease, color 300ms ease;
       }
-      html.dark .home-main {
-        background: #000;
-        color: #f5f5f5;
-      }
+      html.dark .home-main { background: #000; color: #f5f5f5; }
 
       .home-copyright {
         position: fixed;
@@ -136,20 +29,16 @@
         font-size: .875rem;
         text-align: center;
         pointer-events: none;
-        transition: color 300ms ease;
       }
       html.dark .home-copyright { color: #a3a3a3; }
-      .home-hero-wrap,
-      .home-intro-wrap {
+
+      .home-hero-wrap {
         position: relative;
         z-index: 10;
         display: flex;
+        width: 100%;
         flex-direction: column;
         align-items: center;
-      }
-
-      .home-hero-wrap {
-        width: 100%;
         justify-content: center;
         margin: auto 0;
       }
@@ -157,7 +46,6 @@
       .home-intro-wrap {
         width: 100%;
         max-width: 48rem;
-        flex: none;
         margin: 0 auto .5rem;
         padding: 0 1.5rem;
         text-align: center;
@@ -172,19 +60,14 @@
         letter-spacing: .02em;
         transition: color 300ms ease;
       }
-
       html.dark .home-intro { color: #d4d4d4; }
 
-      .home-cta-wrap {
-        display: flex;
-        justify-content: center;
-        gap: .25rem;
-      }
+      .home-cta-wrap { display: flex; justify-content: center; }
 
       #heroButton {
         display: inline-flex;
-        width: fit-content;
         align-items: center;
+        gap: .25rem;
         padding: .2em .6em;
         border: 1px solid transparent;
         border-radius: 999px;
@@ -193,105 +76,51 @@
         font-size: 17px;
         font-weight: 500;
         line-height: 1.2;
-        transition:
-          background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
-          color 300ms cubic-bezier(0.4, 0, 0.2, 1),
-          border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
-          transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      html.dark #heroButton {
-        background: #262626;
-        border-color: #404040;
-      }
-      #heroButton:active { transform: scale(.95); }
-
-      .hero-button-content {
-        display: flex;
-        align-items: center;
-        gap: .25rem;
         white-space: nowrap;
+        transition: background-color 300ms, border-color 300ms, transform 200ms;
       }
+      html.dark #heroButton { background: #262626; border-color: #404040; }
+      #heroButton:active { transform: scale(.95); }
 
       .hero-button-emoji {
         width: 0;
-        margin-left: 0;
         overflow: hidden;
         opacity: 0;
-        transition: opacity 300ms ease, width 300ms ease, margin-left 300ms ease;
+        transition: opacity 300ms ease, width 300ms ease;
       }
-      #heroButton:hover .hero-button-emoji,
-      #heroButton:focus-visible .hero-button-emoji {
-        width: auto;
-        margin-left: .25rem;
-        opacity: 1;
-      }
+      #heroButton:is(:hover, :focus-visible) .hero-button-emoji { width: auto; opacity: 1; }
 
-      /* Frosted panel below the floating cards */
+      /* ───────── Frosted panel under the cards ───────── */
       #glassPanel {
         position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -80px;
-        top: var(--glass-line);
-        background-color: rgba(255, 255, 255, 0.5);
-        -webkit-backdrop-filter: blur(25px);
-        backdrop-filter: blur(25px);
-        border-top: 2px solid rgba(255, 255, 255, 0.7);
+        inset: var(--glass-line) 0 -80px;
         z-index: 50;
+        background: rgb(255 255 255 / 50%);
+        backdrop-filter: blur(25px);
+        border-top: 2px solid rgb(255 255 255 / 70%);
         pointer-events: none;
-        transition:
-          background-color 300ms ease,
-          border-top-color 300ms ease;
+        transition: background-color 300ms, border-top-color 300ms;
       }
-
       html.dark #glassPanel {
-        background-color: rgba(0, 0, 0, 0.4);
-        border-top-color: rgba(255, 255, 255, 0.1);
+        background: rgb(0 0 0 / 40%);
+        border-top-color: rgb(255 255 255 / 10%);
       }
-
       #glassPanel::after {
         content: "";
         position: absolute;
         inset: 0;
-        pointer-events: none;
-        background-color: #fff;
-        -webkit-mask-image: linear-gradient(
-          to bottom,
-          transparent 0%,
-          rgb(0 0 0 / 20%) 25%,
-          rgb(0 0 0 / 75%) 65%,
-          #000 95%
-        );
-        mask-image: linear-gradient(
-          to bottom,
-          transparent 0%,
-          rgb(0 0 0 / 20%) 25%,
-          rgb(0 0 0 / 75%) 65%,
-          #000 95%
-        );
-        transition: background-color 300ms ease;
+        background: #fff;
+        mask-image: linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 20%) 25%, rgb(0 0 0 / 75%) 65%, #000 95%);
       }
+      html.dark #glassPanel::after { background: #000; }
 
-      html.dark #glassPanel::after {
-        background-color: #000;
-      }
-
-      .home-viewport {
-        min-height: 100vh;
-        min-height: 100dvh;
-        overflow-x: clip;
-      }
-
-      /* Floating cards */
+      /* ───────── Card stack ───────── */
       .home-card-scene {
         position: relative;
         display: flex;
         width: 100%;
         --glass-line: 171.6px;
         height: calc(var(--glass-line) + 100px);
-        flex: none;
-        align-items: flex-start;
         justify-content: center;
       }
 
@@ -300,17 +129,20 @@
         z-index: 20;
         display: flex;
         width: 100%;
-        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
         margin: .5rem auto 0;
         padding: 0 1rem;
         transform: scale(.45);
-        transform-origin: center;
-        transition: transform 300ms ease;
       }
 
-      #cardStack > .floating-item + .floating-item { margin-left: -6rem; }
+      /* Static wrapper: holds the card + its label. It never moves, so the label stays put. */
+      .item { position: relative; display: flex; flex: none; }
+      #cardStack > .item:nth-child(1) { z-index: 10; --i: 0; }
+      #cardStack > .item:nth-child(2) { z-index: 20; --i: 1; }
+      #cardStack > .item:nth-child(3) { z-index: 40; --i: 2; }
+      #cardStack > .item:nth-child(4) { z-index: 30; --i: 3; }
+      .item + .item { margin-left: -6rem; }
 
       .floating-item {
         position: relative;
@@ -318,35 +150,109 @@
         cursor: pointer;
         transition: transform 300ms ease;
       }
+      .floating-item:focus-visible { outline: 3px solid #1f97d4; outline-offset: 6px; }
 
+      /* Hover / keyboard / first-tap-on-touch: one shared lift */
+      .floating-item.is-active { transform: translateY(-2rem); }
       @media (hover: hover) {
         .floating-item:hover { transform: translateY(-2rem); }
       }
 
-      .floating-item.is-active { transform: translateY(-2rem); }
+      /* ───────── Labels ───────── */
+      .card-label {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        translate: -50% 0;
+        z-index: 70;
+        width: max-content;
+        margin-bottom: var(--label-gap, 1rem);
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        color: #000;
+        font-size: 14px;
+        line-height: 1.2;
+        text-align: center;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 500ms ease;
+      }
+      .card-label::after {
+        content: "";
+        position: absolute;
+        top: calc(100% - 1px);
+        left: 50%;
+        border: 8px solid transparent;
+        border-bottom: 0;
+        border-top-color: #e5e7eb;
+        transform: translateX(-50%);
+      }
 
+      /* Label shown = opacity 1 + marquee allowed to run (reset when hidden) */
+      .floating-item:is(.is-active, :focus-visible) + .card-label {
+        opacity: 1;
+        --marquee-name: marquee;
+        transition-delay: 300ms;
+      }
+      @media (hover: hover) {
+        .floating-item:hover + .card-label {
+          opacity: 1;
+          --marquee-name: marquee;
+          transition-delay: 300ms;
+        }
+      }
+
+      /* ───────── Now-playing label marquee (pure CSS) ───────── */
+      .spotify-track-label {
+        display: grid;
+        max-width: min(10rem, calc(100vw - 2rem));
+        box-sizing: border-box;
+        border-radius: 10px;
+        line-height: normal;
+        text-transform: uppercase;
+      }
+      .spotify-track-line { min-width: 0; overflow: hidden; white-space: nowrap; }
+      .spotify-track-marquee { display: inline-block; }
+      .spotify-track-artist { color: #525252; font-size: 11px; }
+
+      .spotify-track-marquee.is-scrolling {
+        animation: var(--marquee-name, none) var(--marquee-duration) linear infinite;
+      }
+      @keyframes marquee {
+        0%, 15%   { transform: translateX(0); }
+        45%, 60%  { transform: translateX(calc(-1 * var(--marquee-distance))); }
+        90%, 100% { transform: translateX(0); }
+      }
+
+      /* ───────── Entrance animation ───────── */
+      @media (prefers-reduced-motion: no-preference) {
+        #cardStack.is-revealed .item {
+          animation: rise 1s cubic-bezier(.22, 1, .36, 1) backwards;
+          animation-delay: calc(var(--i, 0) * 35ms);
+        }
+      }
+      @keyframes rise { from { opacity: 0; translate: 0 32px; } }
+
+      /* ───────── Spotify ───────── */
       .spotify-card {
-        z-index: 10;
-        display: flex;
         width: 11rem;
         height: 11rem;
-        --card-rest-y: 16px;
-        transform: translateY(1rem);
+        display: flex;
         border-radius: 999px;
+        transform: translateY(1rem);
       }
-
+      .spotify-card.is-active { transform: translateY(-.5rem); }
       @media (hover: hover) {
-        .spotify-card:hover { transform: translateY(calc(1rem - 1.5rem)); }
+        .spotify-card:hover { transform: translateY(-.5rem); }
       }
-
-      .spotify-card.is-active { transform: translateY(calc(1rem - 1.5rem)); }
 
       .spotify-card-face {
-        position: relative;
         display: flex;
-        box-sizing: border-box;
         width: 100%;
         height: 100%;
+        box-sizing: border-box;
         align-items: center;
         justify-content: center;
         overflow: hidden;
@@ -362,83 +268,21 @@
         border-radius: 50%;
         animation: spin 5s linear infinite;
       }
-
+      .vinyl-record > * { position: absolute; inset: 0; margin: auto; border-radius: 50%; }
       .vinyl-gradient {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        background: conic-gradient(
-          from 180deg at 50% 50%,
-          #333 0deg,
-          #4d4d4d 39deg,
-          #666 79deg,
-          #808080 118deg,
-          #8c8c8c 138deg,
-          #737373 201deg,
-          #333 261deg,
-          #8c8c8c 317deg,
-          #333 360deg
-        );
+        background: conic-gradient(from 180deg at 50% 50%, #333 0deg, #4d4d4d 39deg, #666 79deg, #808080 118deg, #8c8c8c 138deg, #737373 201deg, #333 261deg, #8c8c8c 317deg, #333 360deg);
       }
-      .vinyl-ring,
-      .vinyl-label,
-      .vinyl-hole,
-      .vinyl-center,
-      .album-placeholder,
-      .album-cover {
-        position: absolute;
-        inset: 0;
-        margin: auto;
-        border-radius: 50%;
-      }
-      .vinyl-ring {
-        width: 84%;
-        height: 84%;
-        border: 1px solid #000;
-        opacity: .2;
-      }
-
-      .vinyl-ring-inner {
-        width: 68%;
-        height: 68%;
-      }
-      .vinyl-label {
-        width: 50%;
-        height: 50%;
-        background: #171717;
-      }
-      .vinyl-center {
-        width: 3%;
-        height: 3%;
-        background: #171717;
-      }
-      .vinyl-hole {
-        width: 30%;
-        height: 30%;
-        border-radius: 50%;
-        background: #22c55e;
-      }
-
-      .album-placeholder,
-      .album-cover {
-        width: 68%;
-        height: 68%;
-      }
-
+      .vinyl-ring { width: 84%; height: 84%; border: 1px solid #000; opacity: .2; }
+      .vinyl-ring-inner { width: 68%; height: 68%; }
+      .vinyl-label { width: 50%; height: 50%; background: #171717; }
+      .vinyl-hole { width: 30%; height: 30%; background: #22c55e; }
+      .vinyl-center { width: 3%; height: 3%; background: #171717; }
+      .album-placeholder, .album-cover { width: 68%; height: 68%; }
       .album-cover { object-fit: cover; }
+      @keyframes spin { to { transform: rotate(360deg); } }
 
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .is-hidden { display: none !important; }
-      .resume-card {
-        z-index: 20;
-        width: 340px;
-        height: 288px;
-      }
+      /* ───────── Resume ───────── */
+      .resume-card { width: 340px; height: 288px; }
       .resume-note {
         position: absolute;
         z-index: 20;
@@ -465,12 +309,7 @@
         background: #efefef;
         box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
       }
-      .resume-photo-crop {
-        width: 104px;
-        height: 124px;
-        overflow: hidden;
-        background: #bcc2c8;
-      }
+      .resume-photo-crop { width: 104px; height: 124px; overflow: hidden; background: #bcc2c8; }
       .resume-photo {
         width: 100%;
         height: 100%;
@@ -478,30 +317,12 @@
         object-position: top;
         transform: translateY(25px) scale(1.2);
       }
-      .resume-clip {
-        position: absolute;
-        z-index: 30;
-        top: 7px;
-        left: 48px;
-      }
-      .work-card {
-        z-index: 40;
-        width: 18rem;
-        height: 18rem;
-      }
-      .work-folder-tab {
-        position: absolute;
-        top: 8%;
-        left: 0;
-        width: 100%;
-        height: auto;
-      }
-      .work-folder-projects {
-        position: absolute;
-        inset: 0;
-        z-index: 10;
-        pointer-events: none;
-      }
+      .resume-clip { position: absolute; z-index: 30; top: 7px; left: 48px; }
+
+      /* ───────── Work ───────── */
+      .work-card { width: 18rem; height: 18rem; }
+      .work-folder-tab { position: absolute; top: 8%; left: 0; width: 100%; height: auto; }
+      .work-folder-projects { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
       .work-folder-project {
         position: absolute;
         width: 50%;
@@ -509,29 +330,16 @@
         object-fit: cover;
         transition: transform 500ms ease-out;
       }
-      .work-folder-project-one {
-        top: 25%;
-        right: 8%;
-        z-index: 1;
-      }
-      .work-folder-project-two {
-        top: 15%;
-        left: 23%;
-        z-index: 2;
-      }
-      .work-folder-project-three {
-        top: 25%;
-        left: 8%;
-        z-index: 3;
-      }
+      .work-folder-project-one   { top: 25%; right: 8%; z-index: 1; }
+      .work-folder-project-two   { top: 15%; left: 23%; z-index: 2; }
+      .work-folder-project-three { top: 25%; left: 8%;  z-index: 3; }
+
+      .work-card.is-active :is(.work-folder-project-one, .work-folder-project-three) { transform: translateY(-2rem); }
+      .work-card.is-active .work-folder-project-two { transform: translateY(-2.5rem); }
       @media (hover: hover) {
-        .work-card:hover .work-folder-project-one,
-        .work-card:hover .work-folder-project-three { transform: translateY(-2rem); }
+        .work-card:hover :is(.work-folder-project-one, .work-folder-project-three) { transform: translateY(-2rem); }
         .work-card:hover .work-folder-project-two { transform: translateY(-2.5rem); }
       }
-      .work-card.is-active .work-folder-project-one,
-      .work-card.is-active .work-folder-project-three { transform: translateY(-2rem); }
-      .work-card.is-active .work-folder-project-two { transform: translateY(-2.5rem); }
       .work-folder-front {
         position: absolute;
         z-index: 20;
@@ -540,23 +348,17 @@
         box-sizing: border-box;
         width: 100%;
         height: 52%;
-        border: 0;
         border-radius: 1rem;
         background: linear-gradient(to bottom, #b6d0e2, #91b8d4);
         box-shadow: inset 0 0 0 2px rgb(255 255 255 / 20%);
       }
-      .instagram-card {
-        z-index: 30;
-        width: fit-content;
-        height: 15rem;
-        --card-rest-y: 48px;
-        transform: translateY(3rem);
-      }
 
+      /* ───────── Instagram ───────── */
+      .instagram-card { width: fit-content; height: 15rem; transform: translateY(3rem); }
+      .instagram-card.is-active { transform: translateY(1rem); }
       @media (hover: hover) {
         .instagram-card:hover { transform: translateY(1rem); }
       }
-      .instagram-card.is-active { transform: translateY(1rem); }
       .instagram-photo {
         position: absolute;
         z-index: 40;
@@ -568,157 +370,48 @@
         border-radius: .5rem;
         object-fit: cover;
       }
-      .instagram-frame {
-        position: relative;
-        z-index: 30;
-        width: auto;
-        height: 100%;
-      }
+      .instagram-frame { position: relative; z-index: 30; width: auto; height: 100%; }
 
-      /* Floating-card labels */
-      @media (min-width: 640px) {
-        .home-card-scene { --glass-line: 180.4px; }
-      }
-
-      @media (min-width: 768px) {
-        .home-card-scene { --glass-line: 240.8px; }
-      }
-
-      @media (min-width: 1024px) {
-        .home-card-scene { --glass-line: 257.6px; }
-      }
-
-      .home-card-scene #cardStack > .card-label {
-        position: absolute;
-        z-index: 70;
-        width: max-content;
-        margin: 0;
-        padding: 6px 12px;
-        border-radius: 999px;
-        background: #e5e7eb;
-        color: #000;
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.2;
-        text-align: center;
-        white-space: nowrap;
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: opacity 500ms ease, visibility 0s 0s;
-      }
-
-      .home-card-scene #cardStack > .spotify-track-label {
-        display: grid;
-        width: max-content;
-        max-width: min(10rem, calc(100vw - 2rem));
-        box-sizing: border-box;
-        gap: 0;
-        line-height: normal;
-        border-radius: 10px;
-        text-transform: uppercase;
-      }
-
-      .spotify-track-line {
-        min-width: 0;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      .spotify-track-marquee {
-        display: inline-block;
-      }
-
-      .spotify-track-artist {
-        color: #525252;
-        font-size: 11px;
-      }
-
-      .home-card-scene .card-label::after {
-        content: "";
-        position: absolute;
-        top: calc(100% - 1px);
-        left: 50%;
-        border: 8px solid transparent;
-        border-bottom: 0;
-        border-top-color: #e5e7eb;
-        transform: translateX(-50%);
-      }
-
-      .home-card-scene #cardStack > .card-label.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 500ms ease 300ms, visibility 0s 0s;
-      }
-
-      .home-card-scene .floating-item:focus-visible {
-        outline: 3px solid #1f97d4;
-        outline-offset: 6px;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .home-card-scene .floating-item,
-        .home-card-scene #cardStack > .card-label,
-        .home-card-scene #cardStack > .card-label.is-visible {
-          transition: none;
-        }
-        .home-card-scene .vinyl-record { animation: none; }
-      }
-
-      /* Responsive layout */
+      /* ───────── Responsive ───────── */
       @media (min-width: 640px) {
         .home-main { padding: 4rem 0; }
-        .home-intro-wrap {
-          margin-bottom: 1.5rem;
-          padding: 0 2.5rem;
-        }
-        .home-intro {
-          font-size: 34px;
-          line-height: 3rem;
-        }
+        .home-intro-wrap { margin-bottom: 1.5rem; padding: 0 2.5rem; }
+        .home-intro { font-size: 34px; line-height: 3rem; }
         #heroButton { font-size: 28px; }
-        #cardStack {
-          margin-top: 1.5rem;
-          transform: scale(.75);
-        }
-        #cardStack > .floating-item + .floating-item { margin-left: -3rem; }
+        #cardStack { margin-top: 1.5rem; transform: scale(.75); }
+        .item + .item { margin-left: -3rem; }
         .home-card-scene { --glass-line: 180.4px; }
       }
-
       @media (min-width: 768px) {
         .home-intro-wrap { margin-bottom: 2.5rem; }
-        #cardStack {
-          margin-top: 2.5rem;
-          transform: scale(.9);
-        }
+        #cardStack { margin-top: 2.5rem; transform: scale(.9); }
         .home-card-scene { --glass-line: 240.8px; }
       }
-
       @media (min-width: 1024px) {
         #cardStack { transform: scale(1); }
         .home-card-scene { --glass-line: 257.6px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .floating-item, .card-label { transition: none; }
+        .vinyl-record, .spotify-track-marquee.is-scrolling { animation: none; }
       }
     </style>
   </head>
 
   <body>
-    <div class="home-copyright">
-      ©2026 Wafiq Hasan
-    </div>
+    <div class="home-copyright">©2026 Wafiq Hasan</div>
 
-    <main class="home-viewport home-main">
+    <main class="home-main">
       <div class="home-hero-wrap">
         <div class="home-intro-wrap">
           <h1 class="home-intro">
             Hi! I'm Wafiq 👋🏻 a multidisciplinary designer ✏️ based in Jakarta. 🌲 I believe in form follows function and fun. 🖥️
           </h1>
-
           <div class="home-cta-wrap">
             <a id="heroButton" href="mailto:wafiqhasan10@gmail.com">
-              <span class="hero-button-content">
-                <span>Let's Collaborate!</span>
-                <span class="hero-button-emoji" aria-hidden="true">📩</span>
-              </span>
+              <span>Let's Collaborate!</span>
+              <span class="hero-button-emoji" aria-hidden="true">📩</span>
             </a>
           </div>
         </div>
@@ -726,350 +419,208 @@
         <div class="home-card-scene">
           <div id="glassPanel"></div>
 
-          <!-- Interactive portfolio cards -->
           <div id="cardStack">
-            <a
-              aria-label="SPOTIFY"
-              href="https://open.spotify.com/user/exo6k0vh52vbopuqnrtx3j3jp?si=13e14f5090d74d0c"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="floating-item spotify-card"
-            >
+            <!-- Spotify -->
+            <div class="item" style="--label-gap: 24px">
+              <a
+                aria-label="SPOTIFY"
+                href="https://open.spotify.com/user/exo6k0vh52vbopuqnrtx3j3jp?si=13e14f5090d74d0c"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="floating-item spotify-card"
+              >
+                <div class="spotify-card-face">
+                  <div class="vinyl-record">
+                    <div class="vinyl-gradient"></div>
+                    <div class="vinyl-ring"></div>
+                    <div class="vinyl-ring vinyl-ring-inner"></div>
+                    <div class="vinyl-label"></div>
+                    <div class="vinyl-hole"></div>
+                    <div class="vinyl-center"></div>
+                    <div id="albumPlaceholder" class="album-placeholder"></div>
+                    <img id="albumCover" class="album-cover" hidden />
+                  </div>
+                </div>
+              </a>
               <span class="card-label spotify-track-label" aria-hidden="true">
                 <span class="spotify-track-line">
-                  <span id="spotifyTrackTitle" class="spotify-track-marquee">
-                    SPOTIFY
-                  </span>
+                  <span id="spotifyTrackTitle" class="spotify-track-marquee">SPOTIFY</span>
                 </span>
                 <span class="spotify-track-line">
                   <span id="spotifyTrackArtist" class="spotify-track-marquee spotify-track-artist"></span>
                 </span>
               </span>
-              <div class="spotify-card-face">
-                <div class="vinyl-record">
-                  <div class="vinyl-gradient"></div>
-                  <div class="vinyl-ring"></div>
-                  <div class="vinyl-ring vinyl-ring-inner"></div>
-                  <div class="vinyl-label"></div>
-                  <div class="vinyl-hole"></div>
-                  <div class="vinyl-center"></div>
-                  <div id="albumPlaceholder" class="album-placeholder"></div>
-                  <img
-                    id="albumCover"
-                    class="album-cover is-hidden"
-                    alt="Latest played album cover"
-                  />
-                </div>
-              </div>
-            </a>
+            </div>
 
-            <a
-              aria-label="RESUME"
-              href="about.html"
-              data-page="about.html"
-              class="floating-item resume-card"
-            >
+            <!-- Resume -->
+            <div class="item" style="--label-gap: 24px">
+              <a aria-label="RESUME" href="about.html" data-page="about.html" class="floating-item resume-card">
+                <div class="resume-note">
+                  <div class="resume-note-copy">
+                    i think there's something beautiful about not having everything figured out yet,
+                    even when it feels confusing sometimes 🌱 still figuring things out
+                  </div>
+                </div>
+                <div class="resume-photo-frame">
+                  <div class="resume-photo-crop">
+                    <img src="Images/Profile.webp" alt="Foto profil Wafiq" class="resume-photo" />
+                  </div>
+                </div>
+                <div class="resume-clip">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="76" fill="none" viewBox="0 0 20 74" aria-hidden="true">
+                    <path stroke="url(#a)" stroke-width="2" d="M1 37v27a9 9 0 1 0 18 0V10a9 9 0 1 0-18 0v9" />
+                    <defs>
+                      <linearGradient id="a" x1="9.6" x2="9.6" y1=".6" y2="72.6" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#eee" />
+                        <stop offset="1" stop-color="#666" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </a>
               <span class="card-label" aria-hidden="true">RESUME</span>
-              <div class="resume-note">
-                <div class="resume-note-copy">
-                  i think there's something beautiful about not having everything figured out yet,
-                  even when it feels confusing sometimes 🌱 still figuring things out
-                </div>
-              </div>
+            </div>
 
-              <div class="resume-photo-frame">
-                <div class="resume-photo-crop">
-                  <img
-                    src="Images/Profile.webp"
-                    alt="Photo"
-                    class="resume-photo"
-                  />
-                </div>
-              </div>
-
-              <div class="resume-clip">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="76"
-                  fill="none"
-                  viewBox="0 0 20 74"
-                >
-                  <path
-                    stroke="url(#a)"
-                    stroke-width="2"
-                    d="M1 37v27a9 9 0 1 0 18 0V10a9 9 0 1 0-18 0v9"
-                  />
-                  <defs>
-                    <linearGradient
-                      id="a"
-                      x1="9.6"
-                      x2="9.6"
-                      y1=".6"
-                      y2="72.6"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stop-color="#eee" />
-                      <stop offset="1" stop-color="#666" />
-                    </linearGradient>
-                  </defs>
+            <!-- Work -->
+            <div class="item" style="--label-gap: 48px">
+              <a aria-label="WORK" href="work.html" data-page="work.html" class="floating-item work-card">
+                <svg class="work-folder-tab" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 295 240" aria-hidden="true">
+                  <path fill="#91B8D4" d="M275 239H19a19 19 0 0 1-19-18V19A19 19 0 0 1 19 0h113a19 19 0 0 1 14 6l22 25a19 19 0 0 0 14 6h93a19 19 0 0 1 19 19v165a19 19 0 0 1-19 18" />
                 </svg>
-              </div>
-            </a>
-
-            <a
-              aria-label="WORK"
-              href="work.html"
-              data-page="work.html"
-              class="floating-item work-card"
-            >
+                <div class="work-folder-projects">
+                  <img class="work-folder-project work-folder-project-one" src="Projects/Kirimaja.webp" alt="Kirimaja" />
+                  <img class="work-folder-project work-folder-project-two" src="Projects/LM.webp" alt="Loan Market" />
+                  <img class="work-folder-project work-folder-project-three" src="Projects/Vidio.webp" alt="Vidio" />
+                </div>
+                <div class="work-folder-front"></div>
+              </a>
               <span class="card-label" aria-hidden="true">WORK</span>
-              <svg
-                class="work-folder-tab"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 295 240"
-              >
-                <path
-                  fill="#91B8D4"
-                  d="M275 239H19a19 19 0 0 1-19-18V19A19 19 0 0 1 19 0h113a19 19 0 0 1 14 6l22 25a19 19 0 0 0 14 6h93a19 19 0 0 1 19 19v165a19 19 0 0 1-19 18"
-                />
-              </svg>
-              <div class="work-folder-projects">
-                <img
-                  class="work-folder-project work-folder-project-one"
-                  src="Projects/Kirimaja.webp"
-                  alt="Kirimaja"
-                />
-                <img
-                  class="work-folder-project work-folder-project-two"
-                  src="Projects/LM.webp"
-                  alt="Loan Market"
-                />
-                <img
-                  class="work-folder-project work-folder-project-three"
-                  src="Projects/Vidio.webp"
-                  alt="Vidio"
-                />
-              </div>
-              <div class="work-folder-front"></div>
-            </a>
+            </div>
 
-            <a
-              aria-label="INSTAGRAM"
-              href="https://instagram.com/wafiqhsn"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="floating-item instagram-card"
-            >
-              <span class="card-label" aria-hidden="true">INSTAGRAM</span>
-              <img src="Images/Photo.webp" alt="Photo" class="instagram-photo" />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 203.5 277.8"
-                class="instagram-frame"
+            <!-- Instagram -->
+            <div class="item" style="--label-gap: 0px">
+              <a
+                aria-label="INSTAGRAM"
+                href="https://instagram.com/wafiqhsn"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="floating-item instagram-card"
               >
-                <path
-                  d="M196 264q0-8 8-8v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16V78a8 8 0 0 1 0-16V51a8 8 0 0 1 0-17V23a8 8 0 0 1 0-16V0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-16 0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-17 0H82a8 8 0 0 1-16 0H55a8 8 0 0 1-17 0H27q-1 8-8 8-10 0-9-8H0v7a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v6h10a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11v-6q-8-1-8-8"
-                  fill="#D9DCDF"
-                />
-              </svg>
-            </a>
+                <img src="Images/Photo.webp" alt="Foto Instagram Wafiq" class="instagram-photo" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 203.5 277.8" class="instagram-frame" aria-hidden="true">
+                  <path
+                    fill="#D9DCDF"
+                    d="M196 264q0-8 8-8v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16v-12a8 8 0 0 1 0-16v-11a8 8 0 0 1 0-17v-11a8 8 0 0 1 0-16V78a8 8 0 0 1 0-16V51a8 8 0 0 1 0-17V23a8 8 0 0 1 0-16V0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-16 0h-11a8 8 0 0 1-17 0h-11a8 8 0 0 1-17 0H82a8 8 0 0 1-16 0H55a8 8 0 0 1-17 0H27q-1 8-8 8-10 0-9-8H0v7a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v11a8 8 0 0 1 0 17v11a8 8 0 0 1 0 16v12a8 8 0 0 1 0 16v6h10a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 17 0h11a8 8 0 0 1 16 0h11a8 8 0 0 1 17 0h11v-6q-8-1-8-8"
+                  />
+                </svg>
+              </a>
+              <span class="card-label" aria-hidden="true">INSTAGRAM</span>
+            </div>
           </div>
         </div>
       </div>
     </main>
+
     <script>
       (() => {
-        const stack = document.getElementById("cardStack");
-        if (!stack) return;
+        // Key publik Last.fm digunakan untuk memuat track terbaru.
+        // Lebih aman: panggil lewat serverless function yang menyimpan key di env variable.
+        const API_KEY = "57700d069f0f6393a652370bf2f79427";
+        const USERNAME = "wafiqhsn";
+        const MARQUEE_SPEED = 24; // px per detik
+        const LASTFM_PLACEHOLDER = "2a96cbd8b46e442fc41c2b86b821562f"; // gambar abu-abu default Last.fm
 
-        const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-        const stopTrackMarquees = (label) => {
-          label.querySelectorAll(".spotify-track-marquee").forEach((marquee) => {
-            marquee.getAnimations().forEach((animation) => animation.cancel());
+        const $ = (id) => document.getElementById(id);
+        const stack = $("cardStack");
+        const page = stack.closest("#content");
+        let disposed = false;
+
+        /* ── Marquee: JS hanya mengukur, animasi 100% CSS ── */
+        const fitMarquees = () => {
+          document.querySelectorAll(".spotify-track-line").forEach((line) => {
+            const marquee = line.firstElementChild;
+            const distance = marquee.scrollWidth - line.clientWidth;
+            marquee.classList.toggle("is-scrolling", distance > 0);
+            marquee.style.setProperty("--marquee-distance", `${distance}px`);
+            marquee.style.setProperty("--marquee-duration", `${(distance / MARQUEE_SPEED) * 2 + 3}s`);
           });
         };
-        const updateTrackMarqueeAnimations = (label, isVisible) => {
-          stopTrackMarquees(label);
-          if (!isVisible || reducedMotionQuery.matches) return;
 
-          label.querySelectorAll(".spotify-track-marquee.is-scrolling").forEach((marquee) => {
-            const distance = parseFloat(marquee.style.getPropertyValue("--marquee-distance"));
-            const travelDuration =
-              parseFloat(marquee.style.getPropertyValue("--marquee-travel-duration")) * 1000;
-            if (!distance || !travelDuration) return;
-
-            const pauseDuration = 1000;
-            const totalDuration = travelDuration * 2 + pauseDuration * 3;
-            const startSlide = pauseDuration / totalDuration;
-            const reachEnd = (pauseDuration + travelDuration) / totalDuration;
-            const returnStart = (pauseDuration * 2 + travelDuration) / totalDuration;
-            const reachStart = (pauseDuration * 2 + travelDuration * 2) / totalDuration;
-            const atEnd = `translateX(-${distance}px)`;
-
-            marquee.animate(
-              [
-                { transform: "translateX(0)", offset: 0 },
-                { transform: "translateX(0)", offset: startSlide },
-                { transform: atEnd, offset: reachEnd },
-                { transform: atEnd, offset: returnStart },
-                { transform: "translateX(0)", offset: reachStart },
-                { transform: "translateX(0)", offset: 1 },
-              ],
-              { duration: totalDuration, iterations: Infinity, easing: "linear" },
+        /* ── Last.fm now playing ── */
+        const loadNowPlaying = async () => {
+          if (disposed || document.hidden) return;
+          try {
+            const res = await fetch(
+              `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1`,
             );
-          });
-        };
-        const hoverQuery = window.matchMedia("(hover: hover)");
-        const touchQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
-        let activeCard = null;
-        const entries = [...stack.querySelectorAll(".floating-item")].map((card) => {
-          const label = card.querySelector(".card-label");
-          stack.append(label);
+            const [track] = [].concat((await res.json()).recenttracks.track);
+            if (disposed || !track) return;
 
-          const position = () => {
-            const lift = card.classList.contains("spotify-card")
-              ? 1.5 * rootFontSize
-              : 2 * rootFontSize;
-            const offset = card.classList.contains("resume-card") ? 24 : 0;
-            const restY = parseFloat(
-              getComputedStyle(card).getPropertyValue("--card-rest-y"),
-            ) || 0;
-
-            // Keep the label aligned with the card's resting position, not its hover position.
-            label.style.left = `${card.offsetLeft + (card.offsetWidth - label.offsetWidth) / 2}px`;
-            label.style.top = `${card.offsetTop + restY - lift - 16 + offset - label.offsetHeight}px`;
-          };
-
-          const update = () => {
-            position();
-            const isVisible =
-              card.classList.contains("is-active") ||
-              card.matches(":focus-visible") ||
-              (hoverQuery.matches && card.matches(":hover"));
-            label.classList.toggle("is-visible", isVisible);
-            if (card.classList.contains("spotify-card")) {
-              updateTrackMarqueeAnimations(label, isVisible);
-            }
-          };
-
-          card.addEventListener("click", (event) => {
-            const isTouchTap = touchQuery.matches && event.detail !== 0;
-            if (isTouchTap && !card.classList.contains("is-active")) {
-              event.preventDefault();
-              if (activeCard) {
-                activeCard.classList.remove("is-active");
-                const activeEntry = entries.find(({ card: entryCard }) => entryCard === activeCard);
-                activeEntry?.label.classList.remove("is-visible");
-                if (activeCard.classList.contains("spotify-card") && activeEntry) {
-                  updateTrackMarqueeAnimations(activeEntry.label, false);
-                }
-              }
-              activeCard = card;
-              card.classList.add("is-active");
-              update();
-              return;
+            const title = track.name?.trim();
+            const artist = (track.artist?.["#text"] ?? track.artist)?.trim();
+            if (title && artist) {
+              $("spotifyTrackTitle").textContent = title;
+              $("spotifyTrackArtist").textContent = artist;
+              fitMarquees();
             }
 
-            if (card.classList.contains("is-active")) {
-              card.classList.remove("is-active");
-              activeCard = null;
-              update();
-            }
-
-            if (card.dataset.page && typeof window.navigateTo === "function") {
-              event.preventDefault();
-              window.navigateTo(card.dataset.page);
-            }
-          });
-
-          card.addEventListener("pointerenter", update);
-          card.addEventListener("pointerleave", update);
-          card.addEventListener("focus", update);
-          card.addEventListener("blur", update);
-          return { card, label, position };
-        });
-
-        const refreshVisibleTrackMarquees = () => {
-          entries.forEach(({ card, label }) => {
-            if (card.classList.contains("spotify-card")) {
-              updateTrackMarqueeAnimations(
-                label,
-                card.classList.contains("is-active") ||
-                  card.matches(":focus-visible") ||
-                  (hoverQuery.matches && card.matches(":hover")),
-              );
-            }
-          });
-        };
-        window.addEventListener("spotifytrackchange", refreshVisibleTrackMarquees);
-        const handleReducedMotionChange = () => {
-          if (reducedMotionQuery.matches) {
-            entries.forEach(({ card, label }) => {
-              if (card.classList.contains("spotify-card")) stopTrackMarquees(label);
-            });
-          } else {
-            refreshVisibleTrackMarquees();
+            // Ukuran terbesar dulu, abaikan placeholder abu-abu
+            const cover = track.image
+              ?.map((i) => i["#text"])
+              .reverse()
+              .find((url) => url && !url.includes(LASTFM_PLACEHOLDER));
+            const img = $("albumCover");
+            if (cover && img.src !== cover) img.src = cover;
+            img.hidden = !cover;
+            $("albumPlaceholder").hidden = !!cover;
+          } catch (error) {
+            console.error(error);
           }
         };
-        reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
-        const animateCards = () => {
-          if (!stack.isConnected || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        loadNowPlaying();
+        const timer = setInterval(loadNowPlaying, 30000);
+        window.addEventListener("resize", fitMarquees);
+        document.addEventListener("visibilitychange", loadNowPlaying);
 
-          const cards = entries.map(({ card }) => card);
-          for (let i = cards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [cards[i], cards[j]] = [cards[j], cards[i]];
+        /* ── Touch: tap pertama tampilkan label, tap kedua navigasi ── */
+        const touch = matchMedia("(hover: none) and (pointer: coarse)");
+        let active = null;
+
+        stack.addEventListener("click", (event) => {
+          const card = event.target.closest(".floating-item");
+          if (!card) return;
+
+          if (touch.matches && event.detail !== 0 && card !== active) {
+            event.preventDefault();
+            active?.classList.remove("is-active");
+            (active = card).classList.add("is-active");
+            return;
           }
 
-          cards.forEach((card, order) => {
-            const animation = card.animate([
-              { opacity: 0, translate: "0 32px" },
-              { opacity: 1, translate: "0 0" },
-            ], {
-              duration: 1000,
-              delay: order * 35,
-              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-              fill: "both",
-            });
-            animation.finished.then(() => animation.cancel(), () => {});
-          });
-        };
+          active?.classList.remove("is-active");
+          active = null;
 
-        const pageContainer = stack.closest("#content");
-        if (pageContainer) {
-          pageContainer.addEventListener("pagereveal", animateCards, { once: true });
-          pageContainer.addEventListener(
-            "pageleave",
-            () => pageContainer.removeEventListener("pagereveal", animateCards),
-            { once: true },
-          );
-        } else {
-          requestAnimationFrame(animateCards);
-        }
-
-        const observer = new ResizeObserver(() => {
-          entries.forEach(({ position }) => position());
-        });
-        observer.observe(stack);
-
-        entries.forEach(({ card, label, position }) => {
-          observer.observe(card);
-          observer.observe(label);
-          position();
+          if (card.dataset.page && typeof window.navigateTo === "function") {
+            event.preventDefault();
+            window.navigateTo(card.dataset.page);
+          }
         });
 
-        document.getElementById("content")?.addEventListener(
+        /* ── Entrance: urutan dan delay ditentukan CSS ── */
+        const reveal = () => stack.classList.add("is-revealed");
+        if (page) page.addEventListener("pagereveal", reveal, { once: true });
+        else requestAnimationFrame(reveal);
+
+        /* ── Cleanup saat halaman diganti (SPA) ── */
+        page?.addEventListener(
           "pageleave",
           () => {
-            observer.disconnect();
-            window.removeEventListener("spotifytrackchange", refreshVisibleTrackMarquees);
-            reducedMotionQuery.removeEventListener("change", handleReducedMotionChange);
-            entries.forEach(({ card, label }) => {
-              if (card.classList.contains("spotify-card")) stopTrackMarquees(label);
-            });
+            disposed = true;
+            clearInterval(timer);
+            window.removeEventListener("resize", fitMarquees);
+            document.removeEventListener("visibilitychange", loadNowPlaying);
+            page.removeEventListener("pagereveal", reveal);
           },
           { once: true },
         );
