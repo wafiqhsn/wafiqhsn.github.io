@@ -3,7 +3,15 @@
     // Update the experience, education, skills, and tools in this data section.
     const experience = [
       {
-        period: "Oct 2025 — Present",
+        period: "Nov 2026 — Present",
+        role: "Graphic Designer",
+        company: "ACM Exchange",
+        location: "Jakarta, ID",
+        description:
+          "Created engaging visual designs and marketing content across digital and print platforms. Develop creative concepts, copywriting, and marketing materials while maintaining brand consistency. Collaborate with cross-functional teams to execute effective campaigns, manage multiple projects, and ensure timely delivery of high-quality work.",
+      },
+      {
+        period: "Oct 2025 — Nov 2026",
         role: "Graphic Designer",
         company: "Loan Market",
         location: "Jakarta, ID",
@@ -16,7 +24,7 @@
         company: "Observisual",
         location: "Bandung, ID",
         description:
-          "Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement. I also collaborated closely with Strategic and Project Managers to deliver high-quality creative outputs on time across multiple campaigns.",
+          "Managed creative execution for 6 brands, including two large-scale events, ensuring consistent and impactful visual communication while designing key visuals, marketing collaterals, and social media content that boosted brand awareness and engagement.",
       },
       {
         period: "Aug 2023 — Feb 2024",
@@ -24,7 +32,7 @@
         company: "Vidio",
         location: "Jakarta, ID",
         description:
-          "As a Motion Graphic Designer, I produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.",
+          "Produced 90+ motion graphics for social media campaigns, driving audience engagement. I contributed to video storyboard conceptualization and optimized video assets for multi-platform consistency and quality.",
       },
       {
         period: "Mar 2023 — Jun 2023",
@@ -32,7 +40,7 @@
         company: "Gikslab",
         location: "Bandung, ID",
         description:
-          "As a Creative Designer, I created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.",
+          "Created 80+ social media visuals for Instagram and LinkedIn. I led the production of 3 key video projects, including a company profile and promotional content, and designed impactful pitch decks to support business objectives.",
       },
     ];
 
@@ -381,6 +389,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 0;
     padding: 4px 8px;
     border-radius: 999px;
     background: #e5e7eb;
@@ -389,6 +398,13 @@
     line-height: 1.375;
     text-align: center;
     transition: background-color 300ms ease, color 300ms ease;
+  }
+
+  #about .download-link > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   #about .download-link-primary {
@@ -619,10 +635,10 @@
           <div data-profile-card>
             <div class="profile-background" aria-hidden="true"></div>
             <div class="profile-title-wrap">
-              <h2 class="sr-only">Creative Designer</h2>
+              <h2 class="sr-only">Multidisciplinary Designer</h2>
               <div class="profile-title-track" aria-hidden="true">
-                <span class="profile-title-copy">Creative Designer&nbsp;</span>
-                <span class="profile-title-copy">Creative Designer&nbsp;</span>
+                <span class="profile-title-copy">Multidisciplinary Designer&nbsp;</span>
+                <span class="profile-title-copy">Multidisciplinary Designer&nbsp;</span>
               </div>
             </div>
             <div class="profile-details">
@@ -656,14 +672,14 @@
             target="_blank"
             class="download-link"
           >
-            Download CV
+            <span>Download CV</span>
           </a>
           <a
             href="https://drive.google.com/file/d/1llZMCI6Dl_-RVUQu9ySJ4RSdKSjKFMhu/view?usp=drive_link"
             target="_blank"
             class="download-link download-link-primary"
           >
-            Download Portfolio
+            <span>Download Portfolio</span>
           </a>
         </div>
       </div>
